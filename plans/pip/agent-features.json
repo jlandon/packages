@@ -82,7 +82,7 @@
       "grep -q 'pictureInPictureStopped' packages/video_player/video_player/lib/video_player.dart",
       "grep -q 'isPictureInPictureActive' packages/video_player/video_player/lib/video_player.dart"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F006",

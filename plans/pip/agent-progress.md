@@ -2,7 +2,7 @@
 
 **Task:** Add Picture-in-Picture (PiP) support to the `video_player` federated plugin across Android, iOS, macOS, and Web platforms.
 
-**Features complete: 4 / 29**
+**Features complete: 5 / 29**
 
 **Last session:** 2026-02-17
 
@@ -14,7 +14,7 @@
 | F002 | Platform interface: Unit tests for PiP additions                       | done    |
 | F003 | Platform interface: Version bump and CHANGELOG                         | done    |
 | F004 | App-facing: VideoPlayerValue and VideoPlayerController PiP API         | done    |
-| F005 | App-facing: PiP event handling, lifecycle observer, dispose            | pending |
+| F005 | App-facing: PiP event handling, lifecycle observer, dispose            | done    |
 | F006 | App-facing: Unit tests for PiP features                                | pending |
 | F007 | App-facing: Version bump and CHANGELOG                                 | pending |
 | F008 | Android: Pigeon API definition and code generation                     | pending |
@@ -40,7 +40,7 @@
 | F028 | Documentation: README updates and platform setup guides                | pending |
 | F029 | Documentation: Example app PiP controls                                | pending |
 
-**Next recommended:** F005 (App-facing: PiP event handling, lifecycle observer, dispose)
+**Next recommended:** F006 (App-facing: Unit tests for PiP features)
 
 ## Session Log
 
@@ -71,3 +71,10 @@
 - **Commits:** `9a6ce2536` (agent: impl F004 — add app-facing PiP controller and value API), `2a53c2914` (agent: fix F004 — resolve platform interface dependency, handle PiP events, fix tests)
 - **Details:** Added `isPictureInPictureActive` boolean field to `VideoPlayerValue` with full value-semantic support (constructor default false, copyWith, ==, hashCode, toString). Added five PiP methods to `VideoPlayerController` (`isPictureInPictureSupported`, `startPictureInPicture`, `stopPictureInPicture`, `setAutoPictureInPicture`, `setPictureInPictureActions`) — all check `_isDisposedOrNotInitialized` and delegate to platform. Added barrel exports for `PictureInPictureAction` and `PictureInPictureActionType`. Handled `pictureInPictureStarted`/`pictureInPictureStopped` events in controller event listener. Updated `FakeController` in tests. All 91 tests pass.
 - **Issues:** Low-severity QA notes: CHANGELOG/version not yet bumped (deferred to F007), PiP methods could document platform exceptions, and dedicated PiP unit tests deferred to F006. Path-based `dependency_overrides` present for local federated testing (expected per AGENTS.md).
+
+### Session 5 — 2026-02-17
+
+- **Completed:** F005 — App-facing: PiP event handling, lifecycle observer, dispose
+- **Commits:** `dcb1232f1` (agent: impl F005 — handle PiP lifecycle and dispose cleanup), `70176af48` (agent: fix F005 — add missing PiP event cases in example mini_controllers)
+- **Details:** Updated `_VideoAppLifeCycleObserver.didChangeAppLifecycleState` to skip pausing when `isPictureInPictureActive` is true (early return guard). Updated `VideoPlayerController.dispose()` to call `stopPictureInPicture()` when PiP is active before disposing, wrapped in try/catch to ensure dispose always completes. Added exhaustive switch cases for `pictureInPictureStarted`/`pictureInPictureStopped` in `mini_controller.dart` for both Android and AVFoundation examples. All 91 tests pass, analysis clean, formatting clean.
+- **Issues:** One low-severity QA note: when returning early due to PiP active in lifecycle observer, `_wasPlayingBeforePause` is not updated. If user enters PiP without a prior background transition, resume-from-PiP may not call `play()`. Impact depends on whether native platform pauses playback when PiP closes. Does not block acceptance.
