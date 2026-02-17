@@ -1,0 +1,51 @@
+{
+  "ecosystem": "flutter",
+  "branch": "feature/video-player-pip",
+  "base_branch": "main",
+
+  "max_sessions": 50,
+  "max_stuck": 3,
+  "max_retries": 3,
+  "retry_backoff_seconds": 10,
+  "session_timeout_seconds": 1800,
+
+  "agent_model": "opus-4.6-thinking",
+
+  "use_worktree": true,
+  "local_mode": true,
+  "push_on_complete": false,
+  "cleanup_on_complete": false,
+
+  "bootstrap_command": "export REPO_ROOT=$(pwd) && dart pub get -C $REPO_ROOT/script/tool",
+  "skip_bootstrap": false,
+  "pre_verify": "export REPO_ROOT=$(pwd) && dart run $REPO_ROOT/script/tool/bin/flutter_plugin_tools.dart analyze --packages video_player_platform_interface,video_player,video_player_android,video_player_avfoundation,video_player_web && dart run $REPO_ROOT/script/tool/bin/flutter_plugin_tools.dart dart-test --packages video_player_platform_interface,video_player,video_player_android,video_player_avfoundation,video_player_web",
+  "post_session_hook": "",
+
+  "notify_on_complete": true,
+  "heartbeat_stale_seconds": 300,
+  "log_max_bytes": 10485760,
+
+  "pipeline_mode": true,
+  "max_fix_rounds": 2,
+  "phase_max_retries": 2,
+
+  "phase_models": {
+    "planner": "opus-4.6-thinking",
+    "implementer": "gpt-5.3-codex-high",
+    "verifier": "sonnet-4.5-thinking",
+    "qa-reviewer": "composer-1.5",
+    "fixer": "opus-4.6-thinking",
+    "finalizer": "opus-4.6-thinking"
+  },
+
+  "phase_timeouts": {
+    "planner": 300,
+    "implementer": 1800,
+    "verifier": 600,
+    "qa-reviewer": 900,
+    "fixer": 1200,
+    "finalizer": 600
+  },
+
+  "skip_phases": []
+}
