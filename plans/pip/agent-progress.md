@@ -2,13 +2,15 @@
 
 **Task:** Add Picture-in-Picture (PiP) support to the `video_player` federated plugin across Android, iOS, macOS, and Web platforms.
 
-**Features complete: 0 / 29**
+**Features complete: 1 / 29**
+
+**Last session:** 2026-02-17
 
 ## Feature Summary
 
 | ID   | Description                                                            | Status  |
 | ---- | ---------------------------------------------------------------------- | ------- |
-| F001 | Platform interface: PiP data models, event types, and abstract methods | pending |
+| F001 | Platform interface: PiP data models, event types, and abstract methods | done    |
 | F002 | Platform interface: Unit tests for PiP additions                       | pending |
 | F003 | Platform interface: Version bump and CHANGELOG                         | pending |
 | F004 | App-facing: VideoPlayerValue and VideoPlayerController PiP API         | pending |
@@ -38,6 +40,13 @@
 | F028 | Documentation: README updates and platform setup guides                | pending |
 | F029 | Documentation: Example app PiP controls                                | pending |
 
+**Next recommended:** F002 (Platform interface: Unit tests for PiP additions)
+
 ## Session Log
 
-_No sessions recorded yet._
+### Session 1 — 2026-02-17
+
+- **Completed:** F001 — Platform interface: PiP data models, event types, and abstract methods
+- **Commit:** `bdaf989fb` (agent: impl F001 — add PiP platform interface models and defaults)
+- **Details:** Added `PictureInPictureActionType` enum, `PictureInPictureAction` immutable class, `pictureInPictureStarted`/`pictureInPictureStopped` event types to `VideoEventType`, and five new methods on `VideoPlayerPlatform` (`isPictureInPictureSupported`, `startPictureInPicture`, `stopPictureInPicture`, `setAutoPictureInPicture`, `setPictureInPictureActions`) with backward-compatible default implementations.
+- **Issues:** None. All verification checks passed (analysis, format, tests, API surface).

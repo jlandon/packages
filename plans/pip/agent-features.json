@@ -19,7 +19,7 @@
       "grep -q 'setAutoPictureInPicture' packages/video_player/video_player_platform_interface/lib/video_player_platform_interface.dart",
       "grep -q 'setPictureInPictureActions' packages/video_player/video_player_platform_interface/lib/video_player_platform_interface.dart"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F002",
