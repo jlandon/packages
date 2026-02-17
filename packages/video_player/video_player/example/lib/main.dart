@@ -346,6 +346,58 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
   }
 }
 
+class _PictureInPictureButton extends StatefulWidget {
+  const _PictureInPictureButton({required this.controller});
+
+  final VideoPlayerController controller;
+
+  @override
+  State<_PictureInPictureButton> createState() =>
+      _PictureInPictureButtonState();
+}
+
+class _PictureInPictureButtonState extends State<_PictureInPictureButton> {
+  bool _isPipSupported = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPipSupport();
+  }
+
+  Future<void> _checkPipSupport() async {
+    final bool supported = await widget.controller
+        .isPictureInPictureSupported();
+    if (mounted) {
+      setState(() {
+        _isPipSupported = supported;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isPipSupported) {
+      return const SizedBox.shrink();
+    }
+    final bool isActive = widget.controller.value.isPictureInPictureActive;
+    return IconButton(
+      icon: Icon(
+        isActive ? Icons.picture_in_picture_alt : Icons.picture_in_picture,
+        color: Colors.white,
+      ),
+      tooltip: isActive ? 'Exit PiP' : 'Enter PiP',
+      onPressed: () {
+        if (isActive) {
+          widget.controller.stopPictureInPicture();
+        } else {
+          widget.controller.startPictureInPicture();
+        }
+      },
+    );
+  }
+}
+
 class _ControlsOverlay extends StatelessWidget {
   const _ControlsOverlay({required this.controller});
 
@@ -427,6 +479,10 @@ class _ControlsOverlay extends StatelessWidget {
               child: Text('${controller.value.captionOffset.inMilliseconds}ms'),
             ),
           ),
+        ),
+        Align(
+          alignment: Alignment.bottomLeft,
+          child: _PictureInPictureButton(controller: controller),
         ),
         Align(
           alignment: Alignment.topRight,

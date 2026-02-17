@@ -266,6 +266,53 @@ class AndroidVideoPlayer extends VideoPlayerPlatform {
     return true;
   }
 
+  @override
+  Future<bool> isPictureInPictureSupported() {
+    return _api.isPictureInPictureSupported();
+  }
+
+  @override
+  Future<void> startPictureInPicture(int playerId) {
+    return _api.startPictureInPicture(playerId, <PipAction>[]);
+  }
+
+  @override
+  Future<void> stopPictureInPicture(int playerId) {
+    return _api.stopPictureInPicture(playerId);
+  }
+
+  @override
+  Future<void> setAutoPictureInPicture(int playerId, bool enabled) {
+    return _api.setAutoPictureInPicture(playerId, enabled);
+  }
+
+  @override
+  Future<void> setPictureInPictureActions(
+    int playerId,
+    List<PictureInPictureAction> actions,
+  ) {
+    final List<PipAction> pipActions = actions.map((PictureInPictureAction a) {
+      return PipAction(
+        type: _pipActionTypeFromPictureInPictureActionType(a.type),
+        label: a.label,
+      );
+    }).toList();
+    return _api.setPictureInPictureActions(playerId, pipActions);
+  }
+
+  PipActionType _pipActionTypeFromPictureInPictureActionType(
+    PictureInPictureActionType type,
+  ) {
+    return switch (type) {
+      PictureInPictureActionType.play => PipActionType.play,
+      PictureInPictureActionType.pause => PipActionType.pause,
+      PictureInPictureActionType.skipForward => PipActionType.skipForward,
+      PictureInPictureActionType.skipBackward => PipActionType.skipBackward,
+      PictureInPictureActionType.nextTrack => PipActionType.nextTrack,
+      PictureInPictureActionType.previousTrack => PipActionType.previousTrack,
+    };
+  }
+
   _PlayerInstance _playerWith({required int id}) {
     final _PlayerInstance? player = _players[id];
     return player ?? (throw StateError('No active player with ID $id.'));
@@ -487,6 +534,14 @@ class _PlayerInstance {
             !_audioTrackSelectionCompleter!.isCompleted) {
           _audioTrackSelectionCompleter!.complete();
         }
+      case PictureInPictureStateEvent _:
+        _eventStreamController.add(
+          VideoEvent(
+            eventType: event.isInPictureInPictureMode
+                ? VideoEventType.pictureInPictureStarted
+                : VideoEventType.pictureInPictureStopped,
+          ),
+        );
     }
   }
 

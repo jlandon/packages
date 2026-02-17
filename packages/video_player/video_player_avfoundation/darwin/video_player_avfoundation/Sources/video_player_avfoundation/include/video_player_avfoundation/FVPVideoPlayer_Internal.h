@@ -12,9 +12,11 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /// Interface intended for use by subclasses, but not other callers.
-@interface FVPVideoPlayer ()
+@interface FVPVideoPlayer () <AVPictureInPictureControllerDelegate>
 /// The pixel buffer source associated with this video player.
 @property(nonatomic, readonly) NSObject<FVPPixelBufferSource> *pixelBufferSource;
+/// The Picture-in-Picture controller, if supported.
+@property(nonatomic, nullable) AVPictureInPictureController *pipController;
 /// The view provider, to obtain view information from.
 @property(nonatomic, readonly, nullable) NSObject<FVPViewProvider> *viewProvider;
 /// The preferred transform for the video. It can be used to handle the rotation of the video.

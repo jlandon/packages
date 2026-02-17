@@ -303,6 +303,10 @@ static void upgradeAudioSessionCategory(NSObject<FVPAVAudioSession> *session,
   return [NSURL fileURLWithPath:path].absoluteString;
 }
 
+- (nullable NSNumber *)isPictureInPictureSupported:(FlutterError *_Nullable *_Nonnull)error {
+  return @([AVPictureInPictureController isPictureInPictureSupported]);
+}
+
 /// Returns the AVPlayerItem corresponding to the given player creation options.
 - (nonnull NSObject<FVPAVPlayerItem> *)playerItemWithCreationOptions:
     (nonnull FVPCreationOptions *)options {

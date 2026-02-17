@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import 'package:web/web.dart' as web;
 
 /// Adds a "disablePictureInPicture" setter to [web.HTMLVideoElement]s.
@@ -17,4 +19,23 @@ extension NonStandardSettersOnMediaElement on web.HTMLMediaElement {
   // once it's available.
   external set disableRemotePlayback(bool disabled);
   external set controlsList(String? controlsList);
+}
+
+/// Adds PiP support to [web.HTMLVideoElement]s via the Picture-in-Picture API.
+extension PictureInPictureOnVideoElement on web.HTMLVideoElement {
+  /// Requests Picture-in-Picture mode. Returns a Promise that resolves to
+  /// a PictureInPictureWindow.
+  external JSPromise requestPictureInPicture();
+}
+
+/// Adds PiP support to [web.Document].
+extension PictureInPictureOnDocument on web.Document {
+  /// Returns the element currently being displayed in PiP mode, or null.
+  external web.Element? get pictureInPictureElement;
+
+  /// Whether PiP is available in this document.
+  external bool get pictureInPictureEnabled;
+
+  /// Exits Picture-in-Picture mode.
+  external JSPromise exitPictureInPicture();
 }

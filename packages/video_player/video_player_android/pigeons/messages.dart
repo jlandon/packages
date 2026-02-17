@@ -60,6 +60,29 @@ class AudioTrackChangedEvent extends PlatformVideoEvent {
   late final String? selectedTrackId;
 }
 
+/// Sent when Picture-in-Picture state changes.
+class PictureInPictureStateEvent extends PlatformVideoEvent {
+  /// Whether the app is in PiP mode.
+  late final bool isInPictureInPictureMode;
+}
+
+/// Action types for Picture-in-Picture controls.
+enum PipActionType {
+  play,
+  pause,
+  skipForward,
+  skipBackward,
+  nextTrack,
+  previousTrack,
+}
+
+/// Represents a Picture-in-Picture action.
+class PipAction {
+  PipAction({required this.type, required this.label});
+  PipActionType type;
+  String label;
+}
+
 /// Information passed to the platform view creation.
 class PlatformVideoViewCreationParams {
   const PlatformVideoViewCreationParams({required this.playerId});
@@ -159,6 +182,11 @@ abstract class AndroidVideoPlayerApi {
   void dispose(int playerId);
   void setMixWithOthers(bool mixWithOthers);
   String getLookupKeyForAsset(String asset, String? packageName);
+  bool isPictureInPictureSupported();
+  void startPictureInPicture(int playerId, List<PipAction> actions);
+  void stopPictureInPicture(int playerId);
+  void setAutoPictureInPicture(int playerId, bool enabled);
+  void setPictureInPictureActions(int playerId, List<PipAction> actions);
 }
 
 @HostApi()

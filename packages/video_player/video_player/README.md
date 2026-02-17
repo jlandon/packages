@@ -7,7 +7,7 @@
 A Flutter plugin for iOS, Android and Web for playing back video on a Widget surface.
 
 |             | Android | iOS   | macOS  | Web   |
-|-------------|---------|-------|--------|-------|
+| ----------- | ------- | ----- | ------ | ----- |
 | **Support** | SDK 24+ | 13.0+ | 10.15+ | Any\* |
 
 ![The example app running in iOS](https://github.com/flutter/packages/blob/main/packages/video_player/video_player/doc/demo_ipod.gif?raw=true)
@@ -57,6 +57,7 @@ The `VideoPlayerOptions.mixWithOthers` option can't be implemented in web, at le
 ## Example
 
 <?code-excerpt "basic.dart (basic-example)"?>
+
 ```dart
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -152,3 +153,37 @@ You can set the video view type of your controller (instance of `VideoPlayerCont
 If set to `VideoViewType.platformView`, platform views will be used instead of texture view on supported platforms.
 
 The relative performance of the different view types may vary by platform, and on some platforms the use of platform views may have correctness issues in certain circumstances due to limitations of Flutter's platform view system.
+
+### Picture-in-Picture
+
+The video player supports Picture-in-Picture (PiP) mode on supported platforms (Android 8.0+, iOS/macOS, and web browsers that support the Picture-in-Picture API).
+
+Before using PiP, check if it is supported on the current platform:
+
+```dart
+bool supported = await _controller.isPictureInPictureSupported();
+```
+
+To start and stop PiP mode:
+
+```dart
+await _controller.startPictureInPicture();
+await _controller.stopPictureInPicture();
+```
+
+You can also enable automatic PiP when the app goes to the background:
+
+```dart
+await _controller.setAutoPictureInPicture(true);
+```
+
+To set custom actions displayed in the PiP window (Android only):
+
+```dart
+await _controller.setPictureInPictureActions([
+  PictureInPictureAction(type: PictureInPictureActionType.play, label: 'Play'),
+  PictureInPictureAction(type: PictureInPictureActionType.pause, label: 'Pause'),
+]);
+```
+
+The current PiP state is available via `_controller.value.isPictureInPictureActive`.

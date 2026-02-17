@@ -51,6 +51,7 @@ class VideoPlayer {
 
   bool _isInitialized = false;
   bool _isBuffering = false;
+  bool _autoPictureInPicture = false;
 
   /// Returns the [Stream] of [VideoEvent]s from the inner [web.HTMLVideoElement].
   Stream<VideoEvent> get events => _eventController.stream;
@@ -127,6 +128,35 @@ class VideoPlayer {
       setBuffering(false);
       _eventController.add(VideoEvent(eventType: VideoEventType.completed));
     });
+
+    _videoElement.addEventListener(
+      'enterpictureinpicture',
+      ((web.Event _) {
+        _eventController.add(
+          VideoEvent(eventType: VideoEventType.pictureInPictureStarted),
+        );
+      }).toJS,
+    );
+
+    _videoElement.addEventListener(
+      'leavepictureinpicture',
+      ((web.Event _) {
+        _eventController.add(
+          VideoEvent(eventType: VideoEventType.pictureInPictureStopped),
+        );
+      }).toJS,
+    );
+
+    web.document.addEventListener(
+      'visibilitychange',
+      ((web.Event _) {
+        if (_autoPictureInPicture &&
+            web.document.visibilityState == 'hidden' &&
+            !_videoElement.paused) {
+          requestPictureInPicture();
+        }
+      }).toJS,
+    );
 
     // The `src` of the _videoElement is the last property that is set, so all
     // the listeners for the events that the plugin cares about are attached.
@@ -281,6 +311,62 @@ class VideoPlayer {
     }
     _videoElement.removeAttribute('disableRemotePlayback');
     _videoElement.removeAttribute('poster');
+  }
+
+  /// Requests the browser to enter Picture-in-Picture mode.
+  Future<void> requestPictureInPicture() async {
+    try {
+      await _videoElement.requestPictureInPicture().toDart;
+    } catch (_) {
+      // PiP may not be available or allowed.
+    }
+  }
+
+  /// Exits Picture-in-Picture mode.
+  Future<void> exitPictureInPicture() async {
+    try {
+      if (web.document.pictureInPictureElement != null) {
+        await web.document.exitPictureInPicture().toDart;
+      }
+    } catch (_) {
+      // PiP may not be active.
+    }
+  }
+
+  /// Sets whether the video should automatically enter PiP mode when the page
+  /// is hidden (e.g. user switches tabs).
+  // ignore: use_setters_to_change_properties
+  void setAutoPictureInPicture(bool enabled) {
+    _autoPictureInPicture = enabled;
+  }
+
+  /// Returns whether Picture-in-Picture is supported in the current browser.
+  bool isPictureInPictureSupported() {
+    try {
+      return web.document.pictureInPictureEnabled;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Sets Picture-in-Picture actions using the Media Session API.
+  void setPictureInPictureActions(List<PictureInPictureAction> actions) {
+    try {
+      final mediaSession = web.window.navigator.mediaSession;
+      for (final PictureInPictureAction action in actions) {
+        final String actionName = switch (action.type) {
+          PictureInPictureActionType.play => 'play',
+          PictureInPictureActionType.pause => 'pause',
+          PictureInPictureActionType.skipForward => 'seekforward',
+          PictureInPictureActionType.skipBackward => 'seekbackward',
+          PictureInPictureActionType.nextTrack => 'nexttrack',
+          PictureInPictureActionType.previousTrack => 'previoustrack',
+        };
+        mediaSession.setActionHandler(actionName, null);
+      }
+    } catch (_) {
+      // Media Session API may not be available.
+    }
   }
 
   /// Disposes of the current [web.HTMLVideoElement].

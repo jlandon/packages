@@ -22,6 +22,7 @@ import 'package:video_player_android/src/messages.g.dart' as _i2;
 // ignore_for_file: unnecessary_parenthesis
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
+// ignore_for_file: invalid_use_of_internal_member
 
 class _FakeTexturePlayerIds_0 extends _i1.SmartFake
     implements _i2.TexturePlayerIds {
@@ -130,6 +131,57 @@ class MockAndroidVideoPlayerApi extends _i1.Mock
             ),
           )
           as _i4.Future<String>);
+
+  @override
+  _i4.Future<bool> isPictureInPictureSupported() =>
+      (super.noSuchMethod(
+            Invocation.method(#isPictureInPictureSupported, []),
+            returnValue: _i4.Future<bool>.value(false),
+            returnValueForMissingStub: _i4.Future<bool>.value(false),
+          )
+          as _i4.Future<bool>);
+
+  @override
+  _i4.Future<void> startPictureInPicture(
+    int? playerId,
+    List<_i2.PipAction>? actions,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#startPictureInPicture, [playerId, actions]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> stopPictureInPicture(int? playerId) =>
+      (super.noSuchMethod(
+            Invocation.method(#stopPictureInPicture, [playerId]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> setAutoPictureInPicture(int? playerId, bool? enabled) =>
+      (super.noSuchMethod(
+            Invocation.method(#setAutoPictureInPicture, [playerId, enabled]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> setPictureInPictureActions(
+    int? playerId,
+    List<_i2.PipAction>? actions,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#setPictureInPictureActions, [playerId, actions]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
 }
 
 /// A class which mocks [VideoPlayerInstanceApi].

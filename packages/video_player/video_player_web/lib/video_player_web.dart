@@ -166,6 +166,37 @@ class VideoPlayerPlugin extends VideoPlayerPlatform {
     return HtmlElementView(viewType: 'videoPlayer-$playerId');
   }
 
+  @override
+  Future<bool> isPictureInPictureSupported() async {
+    if (_videoPlayers.isEmpty) {
+      return false;
+    }
+    return _videoPlayers.values.first.isPictureInPictureSupported();
+  }
+
+  @override
+  Future<void> startPictureInPicture(int playerId) async {
+    return _player(playerId).requestPictureInPicture();
+  }
+
+  @override
+  Future<void> stopPictureInPicture(int playerId) async {
+    return _player(playerId).exitPictureInPicture();
+  }
+
+  @override
+  Future<void> setAutoPictureInPicture(int playerId, bool enabled) async {
+    return _player(playerId).setAutoPictureInPicture(enabled);
+  }
+
+  @override
+  Future<void> setPictureInPictureActions(
+    int playerId,
+    List<PictureInPictureAction> actions,
+  ) async {
+    return _player(playerId).setPictureInPictureActions(actions);
+  }
+
   /// Sets the audio mode to mix with other sources (ignored).
   @override
   Future<void> setMixWithOthers(bool mixWithOthers) => Future<void>.value();

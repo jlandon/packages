@@ -493,6 +493,37 @@ NS_INLINE CGFloat radiansToDegrees(CGFloat radians) {
   return mediaSelectionTracks;
 }
 
+- (void)startPictureInPicture:(FlutterError *_Nullable *_Nonnull)error {
+  if (!_pipController) {
+    AVPlayerLayer *playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
+    if ([AVPictureInPictureController isPictureInPictureSupported]) {
+      _pipController = [[AVPictureInPictureController alloc] initWithPlayerLayer:playerLayer];
+      _pipController.delegate = self;
+    }
+  }
+  if (_pipController && !_pipController.isPictureInPictureActive) {
+    [_pipController startPictureInPicture];
+  }
+}
+
+- (void)stopPictureInPicture:(FlutterError *_Nullable *_Nonnull)error {
+  if (_pipController && _pipController.isPictureInPictureActive) {
+    [_pipController stopPictureInPicture];
+  }
+}
+
+#pragma mark - AVPictureInPictureControllerDelegate
+
+- (void)pictureInPictureControllerDidStartPictureInPicture:
+    (AVPictureInPictureController *)pictureInPictureController {
+  [self.eventListener videoPlayerDidEnterPictureInPicture];
+}
+
+- (void)pictureInPictureControllerDidStopPictureInPicture:
+    (AVPictureInPictureController *)pictureInPictureController {
+  [self.eventListener videoPlayerDidExitPictureInPicture];
+}
+
 - (void)selectAudioTrackAtIndex:(NSInteger)trackIndex
                           error:(FlutterError *_Nullable __autoreleasing *_Nonnull)error {
   AVPlayerItem *currentItem = _player.currentItem;

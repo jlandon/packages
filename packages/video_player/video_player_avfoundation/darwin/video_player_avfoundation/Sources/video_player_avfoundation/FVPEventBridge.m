@@ -107,6 +107,14 @@
   [self.eventChannel setStreamHandler:nil];
 }
 
+- (void)videoPlayerDidEnterPictureInPicture {
+  [self sendOrQueue:@{@"event" : @"pictureInPictureStarted"}];
+}
+
+- (void)videoPlayerDidExitPictureInPicture {
+  [self sendOrQueue:@{@"event" : @"pictureInPictureStopped"}];
+}
+
 #pragma mark Private methods
 
 /// Sends the given event to the event sink if it is ready to receive events, or enqueues it to send
