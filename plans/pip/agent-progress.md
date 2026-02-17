@@ -2,7 +2,7 @@
 
 **Task:** Add Picture-in-Picture (PiP) support to the `video_player` federated plugin across Android, iOS, macOS, and Web platforms.
 
-**Features complete: 3 / 29**
+**Features complete: 4 / 29**
 
 **Last session:** 2026-02-17
 
@@ -13,7 +13,7 @@
 | F001 | Platform interface: PiP data models, event types, and abstract methods | done    |
 | F002 | Platform interface: Unit tests for PiP additions                       | done    |
 | F003 | Platform interface: Version bump and CHANGELOG                         | done    |
-| F004 | App-facing: VideoPlayerValue and VideoPlayerController PiP API         | pending |
+| F004 | App-facing: VideoPlayerValue and VideoPlayerController PiP API         | done    |
 | F005 | App-facing: PiP event handling, lifecycle observer, dispose            | pending |
 | F006 | App-facing: Unit tests for PiP features                                | pending |
 | F007 | App-facing: Version bump and CHANGELOG                                 | pending |
@@ -40,7 +40,7 @@
 | F028 | Documentation: README updates and platform setup guides                | pending |
 | F029 | Documentation: Example app PiP controls                                | pending |
 
-**Next recommended:** F004 (App-facing: VideoPlayerValue and VideoPlayerController PiP API)
+**Next recommended:** F005 (App-facing: PiP event handling, lifecycle observer, dispose)
 
 ## Session Log
 
@@ -64,3 +64,10 @@
 - **Commit:** `872f4dc29` (agent: impl F003 — bump platform interface to 6.7.0 for PiP APIs)
 - **Details:** Bumped `video_player_platform_interface` version from 6.6.0 to 6.7.0 in `pubspec.yaml`. Updated `CHANGELOG.md` replacing `## NEXT` with `## 6.7.0` and added entry describing the new Picture-in-Picture APIs: `PictureInPictureActionType` enum, `PictureInPictureAction` class, new event types, and five new `VideoPlayerPlatform` methods.
 - **Issues:** One low-severity QA note: changelog bullet style was changed from `*` to `-` across the entire file; this is a cosmetic difference with no functional impact.
+
+### Session 4 — 2026-02-17
+
+- **Completed:** F004 — App-facing: VideoPlayerValue and VideoPlayerController PiP API
+- **Commits:** `9a6ce2536` (agent: impl F004 — add app-facing PiP controller and value API), `2a53c2914` (agent: fix F004 — resolve platform interface dependency, handle PiP events, fix tests)
+- **Details:** Added `isPictureInPictureActive` boolean field to `VideoPlayerValue` with full value-semantic support (constructor default false, copyWith, ==, hashCode, toString). Added five PiP methods to `VideoPlayerController` (`isPictureInPictureSupported`, `startPictureInPicture`, `stopPictureInPicture`, `setAutoPictureInPicture`, `setPictureInPictureActions`) — all check `_isDisposedOrNotInitialized` and delegate to platform. Added barrel exports for `PictureInPictureAction` and `PictureInPictureActionType`. Handled `pictureInPictureStarted`/`pictureInPictureStopped` events in controller event listener. Updated `FakeController` in tests. All 91 tests pass.
+- **Issues:** Low-severity QA notes: CHANGELOG/version not yet bumped (deferred to F007), PiP methods could document platform exceptions, and dedicated PiP unit tests deferred to F006. Path-based `dependency_overrides` present for local federated testing (expected per AGENTS.md).

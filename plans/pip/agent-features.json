@@ -66,7 +66,7 @@
       "grep -q 'PictureInPictureAction' packages/video_player/video_player/lib/video_player.dart",
       "grep -q 'PictureInPictureActionType' packages/video_player/video_player/lib/video_player.dart"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F005",
