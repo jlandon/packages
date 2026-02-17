@@ -153,6 +153,45 @@ abstract class VideoPlayerPlatform extends PlatformInterface {
   bool isAudioTrackSupportAvailable() {
     return false;
   }
+
+  /// Returns whether Picture-in-Picture is supported on this platform.
+  ///
+  /// The default implementation returns `false`. Platform implementations
+  /// should override this to return `true` if they support Picture-in-Picture.
+  Future<bool> isPictureInPictureSupported() {
+    return Future<bool>.value(false);
+  }
+
+  /// Starts Picture-in-Picture mode for the video.
+  Future<void> startPictureInPicture(int playerId) {
+    throw UnimplementedError(
+      'startPictureInPicture() has not been implemented.',
+    );
+  }
+
+  /// Stops Picture-in-Picture mode for the video.
+  Future<void> stopPictureInPicture(int playerId) {
+    throw UnimplementedError(
+      'stopPictureInPicture() has not been implemented.',
+    );
+  }
+
+  /// Sets whether Picture-in-Picture should start automatically.
+  Future<void> setAutoPictureInPicture(int playerId, bool enabled) {
+    throw UnimplementedError(
+      'setAutoPictureInPicture() has not been implemented.',
+    );
+  }
+
+  /// Sets the available Picture-in-Picture actions.
+  Future<void> setPictureInPictureActions(
+    int playerId,
+    List<PictureInPictureAction> actions,
+  ) {
+    throw UnimplementedError(
+      'setPictureInPictureActions() has not been implemented.',
+    );
+  }
 }
 
 class _PlaceholderImplementation extends VideoPlayerPlatform {}
@@ -355,8 +394,63 @@ enum VideoEventType {
   /// phone calls, or other app media such as music players.
   isPlayingStateUpdate,
 
+  /// The video has entered Picture-in-Picture mode.
+  pictureInPictureStarted,
+
+  /// The video has exited Picture-in-Picture mode.
+  pictureInPictureStopped,
+
   /// An unknown event has been received.
   unknown,
+}
+
+/// Action types available for Picture-in-Picture controls.
+enum PictureInPictureActionType {
+  /// Starts or resumes playback.
+  play,
+
+  /// Pauses playback.
+  pause,
+
+  /// Skips forward in the current media.
+  skipForward,
+
+  /// Skips backward in the current media.
+  skipBackward,
+
+  /// Moves to the next track.
+  nextTrack,
+
+  /// Moves to the previous track.
+  previousTrack,
+}
+
+/// Represents an action available in Picture-in-Picture mode.
+@immutable
+class PictureInPictureAction {
+  /// Constructs an instance of [PictureInPictureAction].
+  const PictureInPictureAction({required this.type, required this.label});
+
+  /// The type of Picture-in-Picture action.
+  final PictureInPictureActionType type;
+
+  /// The label displayed for the action.
+  final String label;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is PictureInPictureAction &&
+            runtimeType == other.runtimeType &&
+            type == other.type &&
+            label == other.label;
+  }
+
+  @override
+  int get hashCode => Object.hash(type, label);
+
+  @override
+  String toString() => 'PictureInPictureAction(type: $type, label: $label)';
 }
 
 /// Describes a discrete segment of time within a video using a [start] and
