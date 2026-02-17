@@ -586,7 +586,9 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
         if (value.isPictureInPictureActive) {
           try {
             await _videoPlayerPlatform.stopPictureInPicture(_playerId);
-          } catch (_) {}
+          } catch (_) {
+            // Intentionally ignored to ensure dispose always completes.
+          }
         }
         _isDisposed = true;
         _timer?.cancel();
