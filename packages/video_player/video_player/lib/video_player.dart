@@ -583,6 +583,11 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     if (_creatingCompleter != null) {
       await _creatingCompleter!.future;
       if (!_isDisposed) {
+        if (value.isPictureInPictureActive) {
+          try {
+            await _videoPlayerPlatform.stopPictureInPicture(_playerId);
+          } catch (_) {}
+        }
         _isDisposed = true;
         _timer?.cancel();
         await _eventSubscription?.cancel();
@@ -893,6 +898,9 @@ class _VideoAppLifeCycleObserver extends Object with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
+      if (_controller.value.isPictureInPictureActive) {
+        return;
+      }
       _wasPlayingBeforePause = _controller.value.isPlaying;
       _controller.pause();
     } else if (state == AppLifecycleState.resumed) {
