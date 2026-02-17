@@ -5,6 +5,7 @@
 #import "./include/video_player_avfoundation/FVPVideoPlayer.h"
 #import "./include/video_player_avfoundation/FVPVideoPlayer_Internal.h"
 
+@import AVKit;
 #import <GLKit/GLKit.h>
 
 #import "./include/video_player_avfoundation/AVAssetTrackUtils.h"
@@ -69,6 +70,9 @@ static NSDictionary<NSString *, NSValue *> *FVPGetPlayerItemObservations(void) {
 @implementation FVPVideoPlayer {
   // Whether or not player and player item listeners have ever been registered.
   BOOL _listenersRegistered;
+  // A standalone AVPlayerLayer created by the base class for PiP when no subclass-provided
+  // layer is available. Cleaned up on dispose.
+  AVPlayerLayer *_pipPlayerLayer;
 }
 
 - (instancetype)initWithPlayerItem:(NSObject<FVPAVPlayerItem> *)item
@@ -164,6 +168,12 @@ static NSDictionary<NSString *, NSValue *> *FVPGetPlayerItemObservations(void) {
     return;
   }
   _disposed = YES;
+
+  // Clean up PiP controller and standalone layer before tearing down the player.
+  _pipController.delegate = nil;
+  _pipController = nil;
+  [_pipPlayerLayer removeFromSuperlayer];
+  _pipPlayerLayer = nil;
 
   if (_listenersRegistered) {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -394,6 +404,43 @@ NS_INLINE CGFloat radiansToDegrees(CGFloat radians) {
   _isInitialized = YES;
   [self.eventListener videoPlayerDidInitializeWithDuration:self.duration
                                                       size:currentItem.presentationSize];
+  // Set up PiP controller eagerly so that isPictureInPicturePossible has time to become YES
+  // before the user requests PiP.
+  [self setupPictureInPicture];
+}
+
+/// Creates the AVPictureInPictureController using the player layer provided by the subclass
+/// (or the base class default). Must be called after the player item is ready to play.
+- (void)setupPictureInPicture {
+  if (![AVPictureInPictureController isPictureInPictureSupported]) {
+    return;
+  }
+  AVPlayerLayer *playerLayer = [self playerLayerForPictureInPicture];
+  if (!playerLayer) {
+    return;
+  }
+  _pipController = [[AVPictureInPictureController alloc] initWithPlayerLayer:playerLayer];
+  _pipController.delegate = self;
+}
+
+/// Returns the AVPlayerLayer to use for PiP. The base class creates a minimal standalone layer
+/// added to the Flutter root view's layer hierarchy. Subclasses (e.g., FVPTextureBasedVideoPlayer)
+/// override this to return their existing player layer.
+- (AVPlayerLayer *)playerLayerForPictureInPicture {
+  if (!_pipPlayerLayer) {
+    _pipPlayerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
+    // A non-zero frame is required for isPictureInPicturePossible to become YES.
+    _pipPlayerLayer.frame = CGRectMake(0, 0, 1, 1);
+#if TARGET_OS_IOS
+    CALayer *rootLayer = self.viewProvider.viewController.view.layer;
+#else
+    CALayer *rootLayer = self.viewProvider.view.layer;
+#endif
+    if (rootLayer) {
+      [rootLayer addSublayer:_pipPlayerLayer];
+    }
+  }
+  return _pipPlayerLayer;
 }
 
 #pragma mark - FVPVideoPlayerInstanceApi
@@ -494,14 +541,8 @@ NS_INLINE CGFloat radiansToDegrees(CGFloat radians) {
 }
 
 - (void)startPictureInPicture:(FlutterError *_Nullable *_Nonnull)error {
-  if (!_pipController) {
-    AVPlayerLayer *playerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
-    if ([AVPictureInPictureController isPictureInPictureSupported]) {
-      _pipController = [[AVPictureInPictureController alloc] initWithPlayerLayer:playerLayer];
-      _pipController.delegate = self;
-    }
-  }
-  if (_pipController && !_pipController.isPictureInPictureActive) {
+  if (_pipController && _pipController.isPictureInPicturePossible &&
+      !_pipController.isPictureInPictureActive) {
     [_pipController startPictureInPicture];
   }
 }
@@ -509,6 +550,15 @@ NS_INLINE CGFloat radiansToDegrees(CGFloat radians) {
 - (void)stopPictureInPicture:(FlutterError *_Nullable *_Nonnull)error {
   if (_pipController && _pipController.isPictureInPictureActive) {
     [_pipController stopPictureInPicture];
+  }
+}
+
+- (void)setAutoPictureInPicture:(BOOL)enabled
+                          error:(FlutterError *_Nullable *_Nonnull)error {
+  if (@available(iOS 14.2, macOS 12.0, *)) {
+    if (_pipController) {
+      _pipController.canStartPictureInPictureAutomaticallyFromInline = enabled;
+    }
   }
 }
 
@@ -522,6 +572,19 @@ NS_INLINE CGFloat radiansToDegrees(CGFloat radians) {
 - (void)pictureInPictureControllerDidStopPictureInPicture:
     (AVPictureInPictureController *)pictureInPictureController {
   [self.eventListener videoPlayerDidExitPictureInPicture];
+}
+
+- (void)pictureInPictureController:(AVPictureInPictureController *)pictureInPictureController
+    failedToStartPictureInPictureWithError:(NSError *)pipError {
+  NSLog(@"Failed to start Picture-in-Picture: %@", pipError.localizedDescription);
+}
+
+- (void)pictureInPictureController:(AVPictureInPictureController *)pictureInPictureController
+    restoreUserInterfaceForPictureInPictureStopWithCompletionHandler:
+        (void (^)(BOOL))completionHandler {
+  // Immediately signal that UI restoration is complete. A future iteration could add a
+  // round-trip to Dart to let the app rebuild its widget tree before calling the handler.
+  completionHandler(YES);
 }
 
 - (void)selectAudioTrackAtIndex:(NSInteger)trackIndex

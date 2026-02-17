@@ -95,6 +95,7 @@ extern void SetUpFVPAVFoundationVideoPlayerApiWithSuffix(id<FlutterBinaryMesseng
 - (void)selectAudioTrackAtIndex:(NSInteger)trackIndex error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)startPictureInPicture:(FlutterError *_Nullable *_Nonnull)error;
 - (void)stopPictureInPicture:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setAutoPictureInPicture:(BOOL)enabled error:(FlutterError *_Nullable *_Nonnull)error;
 @end
 
 extern void SetUpFVPVideoPlayerInstanceApi(id<FlutterBinaryMessenger> binaryMessenger, NSObject<FVPVideoPlayerInstanceApi> *_Nullable api);

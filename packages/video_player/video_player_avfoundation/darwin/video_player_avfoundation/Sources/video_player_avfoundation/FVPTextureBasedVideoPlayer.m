@@ -54,6 +54,9 @@
     // invisible AVPlayerLayer is used to overwrite the protection of pixel buffers in those streams
     // for issue #1, and restore the correct width and height for issue #2.
     _playerLayer = [AVPlayerLayer playerLayerWithPlayer:self.player];
+    // A non-zero frame is required for AVPictureInPictureController to consider PiP possible.
+    // The actual PiP window size is determined by the video dimensions, not the layer frame.
+    _playerLayer.frame = CGRectMake(0, 0, 1, 1);
 #if TARGET_OS_IOS
     CALayer *flutterLayer = viewProvider.viewController.view.layer;
 #else
@@ -83,6 +86,10 @@
 }
 
 #pragma mark - Overrides
+
+- (AVPlayerLayer *)playerLayerForPictureInPicture {
+  return self.playerLayer;
+}
 
 - (void)updatePlayingState {
   [super updatePlayingState];

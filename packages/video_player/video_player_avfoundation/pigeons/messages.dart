@@ -99,4 +99,6 @@ abstract class VideoPlayerInstanceApi {
   void startPictureInPicture();
   @ObjCSelector('stopPictureInPicture')
   void stopPictureInPicture();
+  @ObjCSelector('setAutoPictureInPicture:')
+  void setAutoPictureInPicture(bool enabled);
 }

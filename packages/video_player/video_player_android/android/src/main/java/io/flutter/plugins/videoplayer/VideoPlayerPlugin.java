@@ -21,14 +21,12 @@ import android.util.Rational;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
-import androidx.lifecycle.Lifecycle;
 import androidx.media3.common.util.UnstableApi;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
-import io.flutter.embedding.engine.plugins.lifecycle.FlutterLifecycleAdapter;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugins.videoplayer.platformview.PlatformVideoViewFactory;
 import io.flutter.plugins.videoplayer.platformview.PlatformViewVideoPlayer;
@@ -235,7 +233,7 @@ public class VideoPlayerPlugin implements FlutterPlugin, ActivityAware, AndroidV
   }
 
   @Override
-  public @NonNull Boolean isPictureInPictureSupported() {
+  public boolean isPictureInPictureSupported() {
     return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && activity != null;
   }
 

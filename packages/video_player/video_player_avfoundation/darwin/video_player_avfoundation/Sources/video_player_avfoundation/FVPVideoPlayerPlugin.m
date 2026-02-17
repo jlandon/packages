@@ -6,6 +6,7 @@
 #import "./include/video_player_avfoundation/FVPVideoPlayerPlugin_Test.h"
 
 @import AVFoundation;
+@import AVKit;
 
 #import "./include/video_player_avfoundation/FVPAVFactory.h"
 #import "./include/video_player_avfoundation/FVPAssetProvider.h"

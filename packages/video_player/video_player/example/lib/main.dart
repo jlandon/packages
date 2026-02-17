@@ -229,6 +229,7 @@ class _ButterFlyAssetVideoState extends State<_ButterFlyAssetVideo> {
     _controller = VideoPlayerController.asset(
       'assets/Butterfly-209.mp4',
       viewType: widget.viewType,
+      videoPlayerOptions: VideoPlayerOptions(allowBackgroundPlayback: true),
     );
 
     _controller.addListener(() {
@@ -301,7 +302,10 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
         'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
       ),
       closedCaptionFile: _loadCaptions(),
-      videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+      videoPlayerOptions: VideoPlayerOptions(
+        mixWithOthers: true,
+        allowBackgroundPlayback: true,
+      ),
       viewType: widget.viewType,
     );
 
@@ -362,13 +366,36 @@ class _PictureInPictureButtonState extends State<_PictureInPictureButton> {
   @override
   void initState() {
     super.initState();
+    widget.controller.addListener(_onControllerUpdated);
     _checkPipSupport();
+  }
+
+  @override
+  void didUpdateWidget(_PictureInPictureButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_onControllerUpdated);
+      widget.controller.addListener(_onControllerUpdated);
+      _checkPipSupport();
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onControllerUpdated);
+    super.dispose();
+  }
+
+  void _onControllerUpdated() {
+    if (widget.controller.value.isInitialized && !_isPipSupported) {
+      _checkPipSupport();
+    }
   }
 
   Future<void> _checkPipSupport() async {
     final bool supported = await widget.controller
         .isPictureInPictureSupported();
-    if (mounted) {
+    if (mounted && supported != _isPipSupported) {
       setState(() {
         _isPipSupported = supported;
       });

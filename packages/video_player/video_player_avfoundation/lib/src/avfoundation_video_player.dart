@@ -228,9 +228,8 @@ class AVFoundationVideoPlayer extends VideoPlayerPlatform {
   }
 
   @override
-  Future<void> setAutoPictureInPicture(int playerId, bool enabled) async {
-    // AVFoundation handles auto-PiP via canStartPictureInPictureAutomaticallyFromInline
-    // which is set at player creation time on iOS 14.2+.
+  Future<void> setAutoPictureInPicture(int playerId, bool enabled) {
+    return _playerWith(id: playerId).setAutoPictureInPicture(enabled);
   }
 
   @override
@@ -322,6 +321,9 @@ class _PlayerInstance {
   Future<void> startPictureInPicture() => _api.startPictureInPicture();
 
   Future<void> stopPictureInPicture() => _api.stopPictureInPicture();
+
+  Future<void> setAutoPictureInPicture(bool enabled) =>
+      _api.setAutoPictureInPicture(enabled);
 
   Stream<VideoEvent> get videoEvents {
     _eventSubscription ??= _eventChannel.receiveBroadcastStream().listen(

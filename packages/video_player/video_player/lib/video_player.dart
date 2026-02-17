@@ -419,6 +419,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   Timer? _timer;
   bool _isDisposed = false;
   Completer<void>? _creatingCompleter;
+  Completer<void>? _initializingCompleter;
   StreamSubscription<dynamic>? _eventSubscription;
   _VideoAppLifeCycleObserver? _lifeCycleObserver;
 
@@ -485,7 +486,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
         (await _videoPlayerPlatform.createWithOptions(creationOptions)) ??
         kUninitializedPlayerId;
     _creatingCompleter!.complete(null);
-    final initializingCompleter = Completer<void>();
+    _initializingCompleter = Completer<void>();
 
     // Apply the web-specific options
     if (kIsWeb && videoPlayerOptions?.webOptions != null) {
@@ -511,16 +512,16 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
             isCompleted: false,
           );
           assert(
-            !initializingCompleter.isCompleted,
+            !_initializingCompleter!.isCompleted,
             'VideoPlayerController already initialized. This is typically a '
             'sign that an implementation of the VideoPlayerPlatform '
             '(${_videoPlayerPlatform.runtimeType}) has a bug and is sending '
             'more than one initialized event per instance.',
           );
-          if (initializingCompleter.isCompleted) {
+          if (_initializingCompleter!.isCompleted) {
             throw StateError('VideoPlayerController already initialized');
           }
-          initializingCompleter.complete(null);
+          _initializingCompleter!.complete(null);
           _applyLooping();
           _applyVolume();
           _applyPlayPause();
@@ -563,15 +564,15 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
       final e = obj as PlatformException;
       value = VideoPlayerValue.erroneous(e.message!);
       _timer?.cancel();
-      if (!initializingCompleter.isCompleted) {
-        initializingCompleter.completeError(obj);
+      if (!_initializingCompleter!.isCompleted) {
+        _initializingCompleter!.completeError(obj);
       }
     }
 
     _eventSubscription = _videoPlayerPlatform
         .videoEventsFor(_playerId)
         .listen(eventListener, onError: errorListener);
-    return initializingCompleter.future;
+    return _initializingCompleter!.future;
   }
 
   @override
@@ -759,7 +760,17 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   }
 
   /// Returns whether Picture-in-Picture mode is supported.
+  ///
+  /// If initialization is in progress, this method waits for it to complete
+  /// before checking support.
   Future<bool> isPictureInPictureSupported() async {
+    if (_isDisposed) {
+      return false;
+    }
+    if (_initializingCompleter != null &&
+        !_initializingCompleter!.isCompleted) {
+      await _initializingCompleter!.future;
+    }
     if (_isDisposedOrNotInitialized) {
       return false;
     }
@@ -767,19 +778,34 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   }
 
   /// Starts Picture-in-Picture mode.
+  ///
+  /// On web, the browser may reject the request if there is no recent user
+  /// gesture or the feature is restricted by a permissions policy. Such
+  /// failures are non-fatal — the video continues playing normally.
   Future<void> startPictureInPicture() async {
     if (_isDisposedOrNotInitialized) {
       return;
     }
-    await _videoPlayerPlatform.startPictureInPicture(_playerId);
+    try {
+      await _videoPlayerPlatform.startPictureInPicture(_playerId);
+    } on PlatformException {
+      // PiP failure is non-fatal; the video continues playing normally.
+    }
   }
 
   /// Stops Picture-in-Picture mode.
+  ///
+  /// Failures are non-fatal — if PiP was already exited externally (e.g.,
+  /// the user dismissed the PiP window), this is a silent no-op.
   Future<void> stopPictureInPicture() async {
     if (_isDisposedOrNotInitialized) {
       return;
     }
-    await _videoPlayerPlatform.stopPictureInPicture(_playerId);
+    try {
+      await _videoPlayerPlatform.stopPictureInPicture(_playerId);
+    } on PlatformException {
+      // PiP failure is non-fatal; the video continues playing normally.
+    }
   }
 
   /// Enables or disables automatic entry into Picture-in-Picture mode.
@@ -932,11 +958,15 @@ class VideoPlayer extends StatefulWidget {
 
 class _VideoPlayerState extends State<VideoPlayer> {
   late int _playerId;
+  bool _isPictureInPictureActive = false;
+
   void _controllerDidUpdateValue() {
     final int newPlayerId = widget.controller.playerId;
-    if (newPlayerId != _playerId) {
+    final bool newPipActive = widget.controller.value.isPictureInPictureActive;
+    if (newPlayerId != _playerId || newPipActive != _isPictureInPictureActive) {
       setState(() {
         _playerId = newPlayerId;
+        _isPictureInPictureActive = newPipActive;
       });
     }
   }
@@ -945,6 +975,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
   void initState() {
     super.initState();
     _playerId = widget.controller.playerId;
+    _isPictureInPictureActive =
+        widget.controller.value.isPictureInPictureActive;
     // Need to listen for initialization events since the actual widget ID
     // becomes available after asynchronous initialization finishes.
     widget.controller.addListener(_controllerDidUpdateValue);
@@ -955,6 +987,8 @@ class _VideoPlayerState extends State<VideoPlayer> {
     super.didUpdateWidget(oldWidget);
     oldWidget.controller.removeListener(_controllerDidUpdateValue);
     _playerId = widget.controller.playerId;
+    _isPictureInPictureActive =
+        widget.controller.value.isPictureInPictureActive;
     widget.controller.addListener(_controllerDidUpdateValue);
   }
 
@@ -966,14 +1000,16 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return _playerId == VideoPlayerController.kUninitializedPlayerId
-        ? Container()
-        : _VideoPlayerWithRotation(
-            rotation: widget.controller.value.rotationCorrection,
-            child: _videoPlayerPlatform.buildViewWithOptions(
-              VideoViewOptions(playerId: _playerId),
-            ),
-          );
+    if (_playerId == VideoPlayerController.kUninitializedPlayerId ||
+        _isPictureInPictureActive) {
+      return Container();
+    }
+    return _VideoPlayerWithRotation(
+      rotation: widget.controller.value.rotationCorrection,
+      child: _videoPlayerPlatform.buildViewWithOptions(
+        VideoViewOptions(playerId: _playerId),
+      ),
+    );
   }
 }
 
