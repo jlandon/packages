@@ -95,7 +95,7 @@
       "cd packages/video_player/video_player && flutter test",
       "cd packages/video_player/video_player && dart format --set-exit-if-changed test/"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F007",
@@ -110,7 +110,7 @@
       "grep -qi 'picture-in-picture\\|pip' packages/video_player/video_player/CHANGELOG.md",
       "grep -q '6.7.0' packages/video_player/video_player/pubspec.yaml"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F008",
@@ -128,7 +128,7 @@
       "grep -q 'isPictureInPictureSupported' packages/video_player/video_player_android/pigeons/messages.dart",
       "grep -q 'startPictureInPicture' packages/video_player/video_player_android/pigeons/messages.dart"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F009",
@@ -142,7 +142,7 @@
       "grep -q 'isPictureInPictureSupported' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java",
       "grep -q 'FEATURE_PICTURE_IN_PICTURE' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F010",
@@ -156,7 +156,7 @@
       "grep -q 'stopPictureInPicture\\|FLAG_ACTIVITY_REORDER_TO_FRONT' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java",
       "grep -q 'PictureInPictureParams' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F011",
@@ -169,7 +169,7 @@
       "grep -q 'ComponentCallbacks2\\|onConfigurationChanged' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java",
       "grep -q 'isInPictureInPictureMode' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F012",
@@ -184,7 +184,7 @@
       "grep -q 'FLAG_IMMUTABLE' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java",
       "grep -q 'RECEIVER_NOT_EXPORTED' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F013",
@@ -200,7 +200,7 @@
       "grep -q 'startPictureInPicture' packages/video_player/video_player_android/lib/src/android_video_player.dart",
       "grep -q 'PictureInPictureStateEvent' packages/video_player/video_player_android/lib/src/android_video_player.dart"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F014",
@@ -213,7 +213,7 @@
       "cd packages/video_player/video_player_android && flutter test",
       "cd packages/video_player/video_player_android && dart format --set-exit-if-changed test/"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F015",
@@ -228,7 +228,7 @@
       "grep -qi 'picture-in-picture\\|pip' packages/video_player/video_player_android/CHANGELOG.md",
       "grep -q '6.7.0' packages/video_player/video_player_android/pubspec.yaml"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F016",
@@ -245,7 +245,7 @@
       "grep -q 'stopPictureInPicture' packages/video_player/video_player_avfoundation/pigeons/messages.dart",
       "grep -q 'setAutoPictureInPicture' packages/video_player/video_player_avfoundation/pigeons/messages.dart"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F017",
@@ -258,7 +258,7 @@
       "grep -q 'AVPictureInPictureController' packages/video_player/video_player_avfoundation/darwin/video_player_avfoundation/Sources/video_player_avfoundation/FVPVideoPlayer.m || grep -q 'AVPictureInPictureController' packages/video_player/video_player_avfoundation/darwin/video_player_avfoundation/Sources/video_player_avfoundation/FVPVideoPlayerPlugin.m",
       "grep -rq 'pictureInPictureControllerDidStart\\|didStartPictureInPicture' packages/video_player/video_player_avfoundation/darwin/"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F018",
@@ -272,7 +272,7 @@
       "grep -q 'videoPlayerDidExitPictureInPicture\\|pictureInPictureStopped' packages/video_player/video_player_avfoundation/darwin/video_player_avfoundation/Sources/video_player_avfoundation/FVPEventBridge.m",
       "grep -q 'videoPlayerDidEnterPictureInPicture' packages/video_player/video_player_avfoundation/darwin/video_player_avfoundation/Sources/video_player_avfoundation/include/video_player_avfoundation/FVPVideoEventListener.h"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F019",
@@ -285,7 +285,7 @@
       "grep -rq 'isPictureInPictureSupported' packages/video_player/video_player_avfoundation/darwin/video_player_avfoundation/Sources/video_player_avfoundation/FVPVideoPlayerPlugin.m",
       "grep -rq 'startPictureInPicture' packages/video_player/video_player_avfoundation/darwin/video_player_avfoundation/Sources/video_player_avfoundation/FVPVideoPlayerPlugin.m"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F020",
@@ -301,7 +301,7 @@
       "grep -q 'startPictureInPicture' packages/video_player/video_player_avfoundation/lib/src/avfoundation_video_player.dart",
       "grep -q 'setPictureInPictureActions' packages/video_player/video_player_avfoundation/lib/src/avfoundation_video_player.dart"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F021",
@@ -314,7 +314,7 @@
       "cd packages/video_player/video_player_avfoundation && flutter test",
       "cd packages/video_player/video_player_avfoundation && dart format --set-exit-if-changed test/"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F022",
@@ -329,7 +329,7 @@
       "grep -qi 'picture-in-picture\\|pip' packages/video_player/video_player_avfoundation/CHANGELOG.md",
       "grep -q '6.7.0' packages/video_player/video_player_avfoundation/pubspec.yaml"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F023",
@@ -346,7 +346,7 @@
       "grep -q 'enterpictureinpicture' packages/video_player/video_player_web/lib/src/video_player.dart",
       "grep -q 'leavepictureinpicture' packages/video_player/video_player_web/lib/src/video_player.dart"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F024",
@@ -361,7 +361,7 @@
       "grep -q 'visibilitychange' packages/video_player/video_player_web/lib/src/video_player.dart",
       "grep -q 'mediaSession' packages/video_player/video_player_web/lib/src/video_player.dart"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F025",
@@ -377,7 +377,7 @@
       "grep -q 'startPictureInPicture' packages/video_player/video_player_web/lib/video_player_web.dart",
       "grep -q 'stopPictureInPicture' packages/video_player/video_player_web/lib/video_player_web.dart"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F026",
@@ -390,7 +390,7 @@
       "cd packages/video_player/video_player_web && dart format --set-exit-if-changed test/",
       "cd packages/video_player/video_player_web && flutter analyze"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F027",
@@ -405,7 +405,7 @@
       "grep -qi 'picture-in-picture\\|pip' packages/video_player/video_player_web/CHANGELOG.md",
       "grep -q '6.7.0' packages/video_player/video_player_web/pubspec.yaml"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F028",
@@ -421,7 +421,7 @@
       "grep -qi 'picture-in-picture\\|pip' packages/video_player/video_player_web/README.md || true",
       "grep -qi 'supportsPictureInPicture\\|configChanges' packages/video_player/video_player/README.md"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F029",
@@ -436,6 +436,6 @@
       "grep -q 'startPictureInPicture\\|PiP\\|pip' packages/video_player/video_player/example/lib/main.dart",
       "grep -q 'isPictureInPictureActive' packages/video_player/video_player/example/lib/main.dart"
     ],
-    "passes": false
+    "passes": true
   }
 ]
