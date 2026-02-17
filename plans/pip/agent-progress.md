@@ -2,7 +2,7 @@
 
 **Task:** Add Picture-in-Picture (PiP) support to the `video_player` federated plugin across Android, iOS, macOS, and Web platforms.
 
-**Features complete: 1 / 29**
+**Features complete: 2 / 29**
 
 **Last session:** 2026-02-17
 
@@ -11,7 +11,7 @@
 | ID   | Description                                                            | Status  |
 | ---- | ---------------------------------------------------------------------- | ------- |
 | F001 | Platform interface: PiP data models, event types, and abstract methods | done    |
-| F002 | Platform interface: Unit tests for PiP additions                       | pending |
+| F002 | Platform interface: Unit tests for PiP additions                       | done    |
 | F003 | Platform interface: Version bump and CHANGELOG                         | pending |
 | F004 | App-facing: VideoPlayerValue and VideoPlayerController PiP API         | pending |
 | F005 | App-facing: PiP event handling, lifecycle observer, dispose            | pending |
@@ -40,7 +40,7 @@
 | F028 | Documentation: README updates and platform setup guides                | pending |
 | F029 | Documentation: Example app PiP controls                                | pending |
 
-**Next recommended:** F002 (Platform interface: Unit tests for PiP additions)
+**Next recommended:** F003 (Platform interface: Version bump and CHANGELOG)
 
 ## Session Log
 
@@ -50,3 +50,10 @@
 - **Commit:** `bdaf989fb` (agent: impl F001 — add PiP platform interface models and defaults)
 - **Details:** Added `PictureInPictureActionType` enum, `PictureInPictureAction` immutable class, `pictureInPictureStarted`/`pictureInPictureStopped` event types to `VideoEventType`, and five new methods on `VideoPlayerPlatform` (`isPictureInPictureSupported`, `startPictureInPicture`, `stopPictureInPicture`, `setAutoPictureInPicture`, `setPictureInPictureActions`) with backward-compatible default implementations.
 - **Issues:** None. All verification checks passed (analysis, format, tests, API surface).
+
+### Session 2 — 2026-02-17
+
+- **Completed:** F002 — Platform interface: Unit tests for PiP additions
+- **Commits:** `9f4177637` (agent: impl F002 — add PiP platform interface unit tests), `3aeef1442` (agent: fix F002 — remove explicit type annotations to satisfy omit_obvious_local_variable_types lint)
+- **Details:** Added `picture_in_picture_test.dart` with tests for `PictureInPictureActionType` enum values, `PictureInPictureAction` equality/hashCode/toString, and `VideoEventType` PiP events. Added default implementation tests in `video_player_platform_interface_test.dart` for `isPictureInPictureSupported` (returns false), `startPictureInPicture`, `stopPictureInPicture`, `setAutoPictureInPicture`, and `setPictureInPictureActions` (throw `UnimplementedError`). All 30 tests pass.
+- **Issues:** Minor lint fix needed for `omit_obvious_local_variable_types` (resolved in second commit). One low-severity QA note: hashCode inequality test is technically not guaranteed by contract but unlikely to be flaky in practice.

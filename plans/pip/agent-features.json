@@ -32,7 +32,7 @@
       "cd packages/video_player/video_player_platform_interface && flutter test",
       "cd packages/video_player/video_player_platform_interface && dart format --set-exit-if-changed test/"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F003",
