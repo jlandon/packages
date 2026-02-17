@@ -1,0 +1,441 @@
+[
+  {
+    "id": "F001",
+    "category": "model",
+    "scope": "packages/video_player/video_player_platform_interface",
+    "description": "Add PiP data models, event types, and abstract methods to platform interface. Add PictureInPictureActionType enum (play, pause, skipForward, skipBackward, nextTrack, previousTrack), PictureInPictureAction immutable class with type/label fields and ==, hashCode, toString. Extend VideoEventType with pictureInPictureStarted and pictureInPictureStopped. Add 5 methods to VideoPlayerPlatform: isPictureInPictureSupported() returning Future<bool> defaulting to false, startPictureInPicture(int playerId) throwing UnimplementedError, stopPictureInPicture(int playerId) throwing UnimplementedError, setAutoPictureInPicture(int playerId, bool enabled) throwing UnimplementedError, setPictureInPictureActions(int playerId, List<PictureInPictureAction> actions) throwing UnimplementedError.",
+    "priority": 1,
+    "depends_on": [],
+    "verification": [
+      "cd packages/video_player/video_player_platform_interface && flutter pub get && flutter analyze",
+      "cd packages/video_player/video_player_platform_interface && dart format --set-exit-if-changed lib/",
+      "grep -q 'PictureInPictureAction' packages/video_player/video_player_platform_interface/lib/video_player_platform_interface.dart",
+      "grep -q 'PictureInPictureActionType' packages/video_player/video_player_platform_interface/lib/video_player_platform_interface.dart",
+      "grep -q 'pictureInPictureStarted' packages/video_player/video_player_platform_interface/lib/video_player_platform_interface.dart",
+      "grep -q 'pictureInPictureStopped' packages/video_player/video_player_platform_interface/lib/video_player_platform_interface.dart",
+      "grep -q 'isPictureInPictureSupported' packages/video_player/video_player_platform_interface/lib/video_player_platform_interface.dart",
+      "grep -q 'startPictureInPicture' packages/video_player/video_player_platform_interface/lib/video_player_platform_interface.dart",
+      "grep -q 'stopPictureInPicture' packages/video_player/video_player_platform_interface/lib/video_player_platform_interface.dart",
+      "grep -q 'setAutoPictureInPicture' packages/video_player/video_player_platform_interface/lib/video_player_platform_interface.dart",
+      "grep -q 'setPictureInPictureActions' packages/video_player/video_player_platform_interface/lib/video_player_platform_interface.dart"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F002",
+    "category": "test",
+    "scope": "packages/video_player/video_player_platform_interface/test",
+    "description": "Add unit tests for all new platform interface PiP additions. Test PictureInPictureAction equality, hashCode, and toString. Test PictureInPictureActionType enum values. Test VideoEventType new values exist. Test default implementations of PiP methods on VideoPlayerPlatform (isPictureInPictureSupported returns false, others throw UnimplementedError). Verify that _PlaceholderImplementation compiles with the new methods (backward compatibility AC-001).",
+    "priority": 2,
+    "depends_on": ["F001"],
+    "verification": [
+      "cd packages/video_player/video_player_platform_interface && flutter test",
+      "cd packages/video_player/video_player_platform_interface && dart format --set-exit-if-changed test/"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F003",
+    "category": "cleanup",
+    "scope": "packages/video_player/video_player_platform_interface",
+    "description": "Bump video_player_platform_interface version to 6.7.0 (minor bump for new API surface) in pubspec.yaml. Add CHANGELOG.md entry for 6.7.0 describing the new PiP data models, event types, and abstract methods.",
+    "priority": 3,
+    "depends_on": ["F001", "F002"],
+    "verification": [
+      "grep -q '6.7.0' packages/video_player/video_player_platform_interface/pubspec.yaml",
+      "grep -q '6.7.0' packages/video_player/video_player_platform_interface/CHANGELOG.md",
+      "grep -qi 'picture-in-picture\\|pip' packages/video_player/video_player_platform_interface/CHANGELOG.md"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F004",
+    "category": "state",
+    "scope": "packages/video_player/video_player/lib",
+    "description": "Add isPictureInPictureActive boolean field to VideoPlayerValue (default false). Update the constructor, copyWith method, == operator, hashCode, and toString to include the new field. Update VideoPlayerValue.uninitialized() and VideoPlayerValue.erroneous() to default isPictureInPictureActive to false. Add PiP controller methods to VideoPlayerController: isPictureInPictureSupported(), startPictureInPicture(), stopPictureInPicture(), setAutoPictureInPicture(bool enabled), setPictureInPictureActions(List<PictureInPictureAction> actions). All methods must be silent no-ops when controller is disposed or not initialized. Export PictureInPictureAction and PictureInPictureActionType from the package's barrel export.",
+    "priority": 4,
+    "depends_on": ["F001"],
+    "verification": [
+      "cd packages/video_player/video_player && flutter pub get && flutter analyze",
+      "cd packages/video_player/video_player && dart format --set-exit-if-changed lib/",
+      "grep -q 'isPictureInPictureActive' packages/video_player/video_player/lib/video_player.dart",
+      "grep -q 'startPictureInPicture' packages/video_player/video_player/lib/video_player.dart",
+      "grep -q 'stopPictureInPicture' packages/video_player/video_player/lib/video_player.dart",
+      "grep -q 'setAutoPictureInPicture' packages/video_player/video_player/lib/video_player.dart",
+      "grep -q 'setPictureInPictureActions' packages/video_player/video_player/lib/video_player.dart",
+      "grep -q 'PictureInPictureAction' packages/video_player/video_player/lib/video_player.dart",
+      "grep -q 'PictureInPictureActionType' packages/video_player/video_player/lib/video_player.dart"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F005",
+    "category": "service",
+    "scope": "packages/video_player/video_player/lib",
+    "description": "Handle PiP events in VideoPlayerController's event listener: on pictureInPictureStarted, set isPictureInPictureActive=true; on pictureInPictureStopped, set isPictureInPictureActive=false. Update _VideoAppLifeCycleObserver to NOT pause the video when the app goes to paused state while isPictureInPictureActive is true. Update VideoPlayerController.dispose() to call stopPictureInPicture() (if PiP is active) before disposing the player, wrapped in try/catch to ensure dispose always completes.",
+    "priority": 5,
+    "depends_on": ["F004"],
+    "verification": [
+      "cd packages/video_player/video_player && flutter analyze",
+      "cd packages/video_player/video_player && dart format --set-exit-if-changed lib/",
+      "grep -q 'pictureInPictureStarted' packages/video_player/video_player/lib/video_player.dart",
+      "grep -q 'pictureInPictureStopped' packages/video_player/video_player/lib/video_player.dart",
+      "grep -q 'isPictureInPictureActive' packages/video_player/video_player/lib/video_player.dart"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F006",
+    "category": "test",
+    "scope": "packages/video_player/video_player/test",
+    "description": "Add comprehensive unit tests for video_player PiP features. Test: (1) method delegation to platform interface for all 5 PiP methods, (2) VideoPlayerValue state updates from pictureInPictureStarted/pictureInPictureStopped events, (3) lifecycle observer skips pausing during PiP, (4) copyWith/==/hashCode for updated VideoPlayerValue with isPictureInPictureActive, (5) dispose while PiP active calls stopPictureInPicture then disposes, (6) startPictureInPicture when not initialized is a no-op, (7) startPictureInPicture when already active is idempotent, (8) dispose with stopPictureInPicture failure still completes.",
+    "priority": 6,
+    "depends_on": ["F004", "F005"],
+    "verification": [
+      "cd packages/video_player/video_player && flutter test",
+      "cd packages/video_player/video_player && dart format --set-exit-if-changed test/"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F007",
+    "category": "cleanup",
+    "scope": "packages/video_player/video_player",
+    "description": "Bump video_player version to 2.11.0 (minor bump for new PiP API) in pubspec.yaml. Update the video_player_platform_interface dependency to ^6.7.0. Add CHANGELOG.md entry for 2.11.0 describing the new PiP support: isPictureInPictureActive on VideoPlayerValue, PiP controller methods, lifecycle observer behavior, and dispose cleanup.",
+    "priority": 7,
+    "depends_on": ["F003", "F006"],
+    "verification": [
+      "grep -q '2.11.0' packages/video_player/video_player/pubspec.yaml",
+      "grep -q '2.11.0' packages/video_player/video_player/CHANGELOG.md",
+      "grep -qi 'picture-in-picture\\|pip' packages/video_player/video_player/CHANGELOG.md",
+      "grep -q '6.7.0' packages/video_player/video_player/pubspec.yaml"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F008",
+    "category": "foundation",
+    "scope": "packages/video_player/video_player_android/pigeons",
+    "description": "Update the Android Pigeon API definition (pigeons/messages.dart) with PiP types and methods. Add PipActionType enum (play, pause, skipForward, skipBackward, nextTrack, previousTrack). Add PipAction class with type and label fields. Add PictureInPictureStateEvent extending PlatformVideoEvent with isInPictureInPicture bool field. Add isPictureInPictureSupported() to AndroidVideoPlayerApi (global). Add startPictureInPicture(), stopPictureInPicture(), setAutoPictureInPicture(bool), setPictureInPictureActions(List<PipAction>) to VideoPlayerInstanceApi (per-player). Run Pigeon code generation to regenerate messages.g.dart and Messages.kt.",
+    "priority": 8,
+    "depends_on": ["F001"],
+    "verification": [
+      "cd packages/video_player/video_player_android && flutter pub get && flutter analyze",
+      "cd packages/video_player/video_player_android && dart format --set-exit-if-changed lib/",
+      "grep -q 'PipActionType' packages/video_player/video_player_android/pigeons/messages.dart",
+      "grep -q 'PipAction' packages/video_player/video_player_android/pigeons/messages.dart",
+      "grep -q 'PictureInPictureStateEvent' packages/video_player/video_player_android/pigeons/messages.dart",
+      "grep -q 'isPictureInPictureSupported' packages/video_player/video_player_android/pigeons/messages.dart",
+      "grep -q 'startPictureInPicture' packages/video_player/video_player_android/pigeons/messages.dart"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F009",
+    "category": "service",
+    "scope": "packages/video_player/video_player_android/android/src/main/java",
+    "description": "Implement ActivityAware interface on VideoPlayerPlugin.java to gain Activity access. Add Activity supplier pattern via setActivitySupplier() for safe Activity lifecycle handling. Implement isPictureInPictureSupported() checking activity != null, API level >= 26 (Build.VERSION_CODES.O), and PackageManager.FEATURE_PICTURE_IN_PICTURE system feature. Guard all PiP methods against getActivity() == null.",
+    "priority": 9,
+    "depends_on": ["F008"],
+    "verification": [
+      "grep -q 'ActivityAware' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java",
+      "grep -q 'isPictureInPictureSupported' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java",
+      "grep -q 'FEATURE_PICTURE_IN_PICTURE' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F010",
+    "category": "service",
+    "scope": "packages/video_player/video_player_android/android/src/main/java",
+    "description": "Implement startPictureInPicture() in Java: build PictureInPictureParams with video aspect ratio from the primary PiP player's video dimensions, include auto-enter setting (Android 12+) and custom actions (if set), call activity.enterPictureInPictureMode(). Maintain a single accumulated PictureInPictureParams.Builder state to avoid param fragmentation. Implement stopPictureInPicture() by launching the Activity with FLAG_ACTIVITY_REORDER_TO_FRONT (no-op if not in PiP mode). Set primaryPipPlayerId when startPictureInPicture() is called.",
+    "priority": 10,
+    "depends_on": ["F009"],
+    "verification": [
+      "grep -q 'startPictureInPicture\\|enterPictureInPictureMode' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java",
+      "grep -q 'stopPictureInPicture\\|FLAG_ACTIVITY_REORDER_TO_FRONT' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java",
+      "grep -q 'PictureInPictureParams' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F011",
+    "category": "service",
+    "scope": "packages/video_player/video_player_android/android/src/main/java",
+    "description": "Implement PiP mode change detection via Activity.registerComponentCallbacks() with a ComponentCallbacks2 implementation that checks activity.isInPictureInPictureMode() on configuration changes. When PiP mode changes, emit PictureInPictureStateEvent to ALL active players' event channels (since Android PiP is Activity-level). When a new player is registered while Activity is already in PiP mode, immediately emit PictureInPictureStateEvent(isInPictureInPicture: true) to the new player.",
+    "priority": 11,
+    "depends_on": ["F010"],
+    "verification": [
+      "grep -q 'ComponentCallbacks2\\|onConfigurationChanged' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java",
+      "grep -q 'isInPictureInPictureMode' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F012",
+    "category": "service",
+    "scope": "packages/video_player/video_player_android/android/src/main/java",
+    "description": "Implement setAutoPictureInPicture(bool) using setAutoEnterEnabled() on Android 12+ (API 31). On pre-Android 12, silent no-op. Implement custom PiP actions via RemoteAction with BroadcastReceiver for action handling. Maximum actions respect Activity.getMaxNumPictureInPictureActions(). BroadcastReceiver must be dynamically registered with unregisterReceiver() on plugin detach and player dispose. Use RECEIVER_NOT_EXPORTED flag on Android 14+ (API 34). PendingIntent must use FLAG_IMMUTABLE and be scoped to the app's package.",
+    "priority": 12,
+    "depends_on": ["F010"],
+    "verification": [
+      "grep -q 'setAutoEnterEnabled\\|setAutoPictureInPicture' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java",
+      "grep -q 'RemoteAction\\|BroadcastReceiver' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java",
+      "grep -q 'FLAG_IMMUTABLE' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java",
+      "grep -q 'RECEIVER_NOT_EXPORTED' packages/video_player/video_player_android/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F013",
+    "category": "service",
+    "scope": "packages/video_player/video_player_android/lib",
+    "description": "Implement Dart-side PiP delegation in AndroidVideoPlayer. Add isPictureInPictureSupported() calling _api.isPictureInPictureSupported(). Add startPictureInPicture(int playerId) delegating to _playerWith(id: playerId). Add stopPictureInPicture(int playerId), setAutoPictureInPicture(int playerId, bool enabled), setPictureInPictureActions(int playerId, List<PictureInPictureAction> actions) all delegating to player instance API. Handle PictureInPictureStateEvent in _PlayerInstance._onStreamEvent to emit VideoEvent with pictureInPictureStarted/Stopped. Map between platform interface PictureInPictureActionType and Pigeon PipActionType.",
+    "priority": 13,
+    "depends_on": ["F008", "F011", "F012"],
+    "verification": [
+      "cd packages/video_player/video_player_android && flutter pub get && flutter analyze",
+      "cd packages/video_player/video_player_android && dart format --set-exit-if-changed lib/",
+      "grep -q 'isPictureInPictureSupported' packages/video_player/video_player_android/lib/src/android_video_player.dart",
+      "grep -q 'startPictureInPicture' packages/video_player/video_player_android/lib/src/android_video_player.dart",
+      "grep -q 'PictureInPictureStateEvent' packages/video_player/video_player_android/lib/src/android_video_player.dart"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F014",
+    "category": "test",
+    "scope": "packages/video_player/video_player_android/test",
+    "description": "Add Dart-side unit tests for Android PiP functionality. Test: isPictureInPictureSupported() delegation to Pigeon API, startPictureInPicture delegation, stopPictureInPicture delegation, setAutoPictureInPicture delegation, setPictureInPictureActions delegation with action type mapping, PictureInPictureStateEvent handling (emits correct VideoEventType), error handling when PiP methods fail. Use existing mock infrastructure (mockito) to mock the Pigeon APIs.",
+    "priority": 14,
+    "depends_on": ["F013"],
+    "verification": [
+      "cd packages/video_player/video_player_android && flutter test",
+      "cd packages/video_player/video_player_android && dart format --set-exit-if-changed test/"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F015",
+    "category": "cleanup",
+    "scope": "packages/video_player/video_player_android",
+    "description": "Bump video_player_android version to 2.10.0 (minor bump for new PiP feature) in pubspec.yaml. Update the video_player_platform_interface dependency to ^6.7.0. Add CHANGELOG.md entry for 2.10.0 describing the new PiP support: Activity-level PiP, auto-enter on Android 12+, custom actions, multi-player event routing.",
+    "priority": 15,
+    "depends_on": ["F014"],
+    "verification": [
+      "grep -q '2.10.0' packages/video_player/video_player_android/pubspec.yaml",
+      "grep -q '2.10.0' packages/video_player/video_player_android/CHANGELOG.md",
+      "grep -qi 'picture-in-picture\\|pip' packages/video_player/video_player_android/CHANGELOG.md",
+      "grep -q '6.7.0' packages/video_player/video_player_android/pubspec.yaml"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F016",
+    "category": "foundation",
+    "scope": "packages/video_player/video_player_avfoundation/pigeons",
+    "description": "Update the AVFoundation Pigeon API definition (pigeons/messages.dart) with PiP methods. Add isPictureInPictureSupported() to AVFoundationVideoPlayerApi (global). Add startPictureInPicture(), stopPictureInPicture() (as @async to resolve after delegate fires), and setAutoPictureInPicture(bool) to VideoPlayerInstanceApi (per-player). Intentionally omit setPictureInPictureActions since AVFoundation PiP windows don't support custom actions. Run Pigeon code generation to regenerate messages.g.dart and Objective-C header/source files.",
+    "priority": 16,
+    "depends_on": ["F001"],
+    "verification": [
+      "cd packages/video_player/video_player_avfoundation && flutter pub get && flutter analyze",
+      "cd packages/video_player/video_player_avfoundation && dart format --set-exit-if-changed lib/",
+      "grep -q 'isPictureInPictureSupported' packages/video_player/video_player_avfoundation/pigeons/messages.dart",
+      "grep -q 'startPictureInPicture' packages/video_player/video_player_avfoundation/pigeons/messages.dart",
+      "grep -q 'stopPictureInPicture' packages/video_player/video_player_avfoundation/pigeons/messages.dart",
+      "grep -q 'setAutoPictureInPicture' packages/video_player/video_player_avfoundation/pigeons/messages.dart"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F017",
+    "category": "service",
+    "scope": "packages/video_player/video_player_avfoundation/darwin",
+    "description": "Implement AVPictureInPictureController creation per player in the Objective-C implementation. Create the controller after AVPlayerItem status is .readyToPlay. Hold a strong reference for entire PiP duration. Implement AVPictureInPictureControllerDelegate to handle PiP lifecycle: pictureInPictureControllerDidStartPictureInPicture, didStopPictureInPicture, didFailToStartWithError. For restoreUserInterfaceForPictureInPictureStopWithCompletionHandler, always call completionHandler(YES) (v1 behavior). Support both platform view (FVPNativeVideoView) and texture view (FVPTextureBasedVideoPlayer). For texture views, ensure AVPlayerLayer has a non-zero frame.",
+    "priority": 17,
+    "depends_on": ["F016"],
+    "verification": [
+      "grep -q 'AVPictureInPictureController' packages/video_player/video_player_avfoundation/darwin/video_player_avfoundation/Sources/video_player_avfoundation/FVPVideoPlayer.m || grep -q 'AVPictureInPictureController' packages/video_player/video_player_avfoundation/darwin/video_player_avfoundation/Sources/video_player_avfoundation/FVPVideoPlayerPlugin.m",
+      "grep -rq 'pictureInPictureControllerDidStart\\|didStartPictureInPicture' packages/video_player/video_player_avfoundation/darwin/"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F018",
+    "category": "service",
+    "scope": "packages/video_player/video_player_avfoundation/darwin",
+    "description": "Add PiP event methods to FVPVideoEventListener protocol: videoPlayerDidEnterPictureInPicture and videoPlayerDidExitPictureInPicture. Implement these in FVPEventBridge using the existing sendOrQueue: pattern, sending events with keys 'pictureInPictureStarted' and 'pictureInPictureStopped'. On iOS, configure the audio session with .playback category for PiP to function. Implement setAutoPictureInPicture setting canStartPictureInPictureAutomaticallyFromInline on iOS 14.2+ and macOS 12.0+. Handle pipPossibleObservation KVO cleanup in dispose path.",
+    "priority": 18,
+    "depends_on": ["F017"],
+    "verification": [
+      "grep -q 'videoPlayerDidEnterPictureInPicture\\|pictureInPictureStarted' packages/video_player/video_player_avfoundation/darwin/video_player_avfoundation/Sources/video_player_avfoundation/FVPEventBridge.m",
+      "grep -q 'videoPlayerDidExitPictureInPicture\\|pictureInPictureStopped' packages/video_player/video_player_avfoundation/darwin/video_player_avfoundation/Sources/video_player_avfoundation/FVPEventBridge.m",
+      "grep -q 'videoPlayerDidEnterPictureInPicture' packages/video_player/video_player_avfoundation/darwin/video_player_avfoundation/Sources/video_player_avfoundation/include/video_player_avfoundation/FVPVideoEventListener.h"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F019",
+    "category": "service",
+    "scope": "packages/video_player/video_player_avfoundation/darwin",
+    "description": "Implement the Pigeon host API methods for PiP in Objective-C. Implement isPictureInPictureSupported checking AVPictureInPictureController.isPictureInPictureSupported. Implement startPictureInPicture calling [pipController startPictureInPicture]. Implement stopPictureInPicture as @async, resolving only after pictureInPictureControllerDidStopPictureInPicture: fires (preventing dispose race conditions). Implement setAutoPictureInPicture setting canStartPictureInPictureAutomaticallyFromInline with API version checks.",
+    "priority": 19,
+    "depends_on": ["F017"],
+    "verification": [
+      "grep -rq 'isPictureInPictureSupported' packages/video_player/video_player_avfoundation/darwin/video_player_avfoundation/Sources/video_player_avfoundation/FVPVideoPlayerPlugin.m",
+      "grep -rq 'startPictureInPicture' packages/video_player/video_player_avfoundation/darwin/video_player_avfoundation/Sources/video_player_avfoundation/FVPVideoPlayerPlugin.m"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F020",
+    "category": "service",
+    "scope": "packages/video_player/video_player_avfoundation/lib",
+    "description": "Implement Dart-side PiP delegation in AVFoundationVideoPlayer. Add isPictureInPictureSupported() calling _api.isPictureInPictureSupported(). Add startPictureInPicture(int playerId) delegating to player instance API. Add stopPictureInPicture(int playerId), setAutoPictureInPicture(int playerId, bool enabled) delegating to player instance API. Override setPictureInPictureActions() as a silent no-op (AVFoundation doesn't support custom PiP actions). Handle PiP events in _PlayerInstance._onStreamEvent to map 'pictureInPictureStarted'/'pictureInPictureStopped' to VideoEventType.",
+    "priority": 20,
+    "depends_on": ["F016", "F018", "F019"],
+    "verification": [
+      "cd packages/video_player/video_player_avfoundation && flutter pub get && flutter analyze",
+      "cd packages/video_player/video_player_avfoundation && dart format --set-exit-if-changed lib/",
+      "grep -q 'isPictureInPictureSupported' packages/video_player/video_player_avfoundation/lib/src/avfoundation_video_player.dart",
+      "grep -q 'startPictureInPicture' packages/video_player/video_player_avfoundation/lib/src/avfoundation_video_player.dart",
+      "grep -q 'setPictureInPictureActions' packages/video_player/video_player_avfoundation/lib/src/avfoundation_video_player.dart"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F021",
+    "category": "test",
+    "scope": "packages/video_player/video_player_avfoundation/test",
+    "description": "Add Dart-side unit tests for AVFoundation PiP functionality. Test: isPictureInPictureSupported() delegation, startPictureInPicture delegation, stopPictureInPicture delegation, setAutoPictureInPicture delegation, setPictureInPictureActions is a no-op (no Pigeon call made), PiP event handling from event channel (pictureInPictureStarted/Stopped events map correctly to VideoEventType). Use existing mock infrastructure (mockito) to mock Pigeon APIs.",
+    "priority": 21,
+    "depends_on": ["F020"],
+    "verification": [
+      "cd packages/video_player/video_player_avfoundation && flutter test",
+      "cd packages/video_player/video_player_avfoundation && dart format --set-exit-if-changed test/"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F022",
+    "category": "cleanup",
+    "scope": "packages/video_player/video_player_avfoundation",
+    "description": "Bump video_player_avfoundation version to 2.10.0 (minor bump for new PiP feature) in pubspec.yaml. Update the video_player_platform_interface dependency to ^6.7.0. Add CHANGELOG.md entry for 2.10.0 describing the new PiP support: AVPictureInPictureController integration, texture and platform view support, auto-enter PiP, audio session configuration.",
+    "priority": 22,
+    "depends_on": ["F021"],
+    "verification": [
+      "grep -q '2.10.0' packages/video_player/video_player_avfoundation/pubspec.yaml",
+      "grep -q '2.10.0' packages/video_player/video_player_avfoundation/CHANGELOG.md",
+      "grep -qi 'picture-in-picture\\|pip' packages/video_player/video_player_avfoundation/CHANGELOG.md",
+      "grep -q '6.7.0' packages/video_player/video_player_avfoundation/pubspec.yaml"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F023",
+    "category": "service",
+    "scope": "packages/video_player/video_player_web/lib/src",
+    "description": "Implement PiP start/stop and event listeners in web VideoPlayer class. Add startPictureInPicture() calling videoElement.requestPictureInPicture(). Add stopPictureInPicture() calling document.exitPictureInPicture() only if document.pictureInPictureElement is this player's video element (no-op otherwise). Add event listeners for 'enterpictureinpicture' and 'leavepictureinpicture' on the video element in initialize() to emit corresponding VideoEventType events through the event controller.",
+    "priority": 23,
+    "depends_on": ["F001"],
+    "verification": [
+      "cd packages/video_player/video_player_web && flutter pub get && flutter analyze",
+      "cd packages/video_player/video_player_web && dart format --set-exit-if-changed lib/",
+      "grep -q 'requestPictureInPicture\\|startPictureInPicture' packages/video_player/video_player_web/lib/src/video_player.dart",
+      "grep -q 'exitPictureInPicture\\|stopPictureInPicture' packages/video_player/video_player_web/lib/src/video_player.dart",
+      "grep -q 'enterpictureinpicture' packages/video_player/video_player_web/lib/src/video_player.dart",
+      "grep -q 'leavepictureinpicture' packages/video_player/video_player_web/lib/src/video_player.dart"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F024",
+    "category": "service",
+    "scope": "packages/video_player/video_player_web/lib/src",
+    "description": "Implement auto-enter PiP via visibilitychange event on web. When auto-enter is enabled and the document becomes hidden, attempt to requestPictureInPicture() wrapped in try/catch to handle browser rejections silently. Remove the visibilitychange listener when the player is disposed. Implement custom actions via Media Session API (navigator.mediaSession.setActionHandler()). Clear Media Session handlers (setActionHandler(name, null)) when PiP stops or the player is disposed. Ensure all PiP-related event listeners are explicitly removed in dispose().",
+    "priority": 24,
+    "depends_on": ["F023"],
+    "verification": [
+      "cd packages/video_player/video_player_web && flutter analyze",
+      "cd packages/video_player/video_player_web && dart format --set-exit-if-changed lib/",
+      "grep -q 'visibilitychange' packages/video_player/video_player_web/lib/src/video_player.dart",
+      "grep -q 'mediaSession' packages/video_player/video_player_web/lib/src/video_player.dart"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F025",
+    "category": "service",
+    "scope": "packages/video_player/video_player_web/lib",
+    "description": "Implement PiP method overrides in web VideoPlayerPlugin (video_player_web.dart). Add isPictureInPictureSupported() checking document.pictureInPictureEnabled. Add startPictureInPicture(int playerId) delegating to _player(playerId). Add stopPictureInPicture(int playerId) delegating to _player(playerId). Add setAutoPictureInPicture(int playerId, bool enabled) delegating to _player(playerId). Add setPictureInPictureActions(int playerId, List<PictureInPictureAction> actions) delegating to _player(playerId). Ensure all cleanup is handled in dispose().",
+    "priority": 25,
+    "depends_on": ["F023", "F024"],
+    "verification": [
+      "cd packages/video_player/video_player_web && flutter analyze",
+      "cd packages/video_player/video_player_web && dart format --set-exit-if-changed lib/",
+      "grep -q 'isPictureInPictureSupported' packages/video_player/video_player_web/lib/video_player_web.dart",
+      "grep -q 'startPictureInPicture' packages/video_player/video_player_web/lib/video_player_web.dart",
+      "grep -q 'stopPictureInPicture' packages/video_player/video_player_web/lib/video_player_web.dart"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F026",
+    "category": "test",
+    "scope": "packages/video_player/video_player_web/test",
+    "description": "Add unit tests for web PiP functionality. This may require creating a test file since the existing one just points elsewhere. Test: isPictureInPictureSupported() checks document.pictureInPictureEnabled, startPictureInPicture calls requestPictureInPicture, stopPictureInPicture checks pictureInPictureElement before calling exitPictureInPicture, auto-enter behavior with visibilitychange, event listener setup for enterpictureinpicture/leavepictureinpicture, dispose cleanup of all PiP listeners. Note: web tests may have limited CI support; mock browser APIs as needed.",
+    "priority": 26,
+    "depends_on": ["F025"],
+    "verification": [
+      "cd packages/video_player/video_player_web && dart format --set-exit-if-changed test/",
+      "cd packages/video_player/video_player_web && flutter analyze"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F027",
+    "category": "cleanup",
+    "scope": "packages/video_player/video_player_web",
+    "description": "Bump video_player_web version to 2.5.0 (minor bump for new PiP feature) in pubspec.yaml. Update the video_player_platform_interface dependency to ^6.7.0. Add CHANGELOG.md entry for 2.5.0 describing the new PiP support: browser Picture-in-Picture API, auto-enter via visibilitychange, Media Session custom actions, browser compatibility.",
+    "priority": 27,
+    "depends_on": ["F026"],
+    "verification": [
+      "grep -q '2.5.0' packages/video_player/video_player_web/pubspec.yaml",
+      "grep -q '2.5.0' packages/video_player/video_player_web/CHANGELOG.md",
+      "grep -qi 'picture-in-picture\\|pip' packages/video_player/video_player_web/CHANGELOG.md",
+      "grep -q '6.7.0' packages/video_player/video_player_web/pubspec.yaml"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F028",
+    "category": "cleanup",
+    "scope": "packages/video_player",
+    "description": "Update README files for all 5 packages with PiP documentation. For each README: describe PiP API methods, platform-specific behavior, and setup requirements. Document Android manifest setup (android:supportsPictureInPicture, android:configChanges). Document iOS background mode capability requirement. Note macOS and Web require no additional setup. Include a minimal-but-complete code snippet showing PiP integration (check support, start PiP, handle state, stop PiP). Document isPictureInPictureActive cross-platform asymmetry (Android: all controllers see true; iOS/macOS/Web: only initiating controller). Document allowBackgroundPlayback interaction with PiP. Include guidance on Texture widget placeholder during iOS/macOS PiP.",
+    "priority": 28,
+    "depends_on": ["F007", "F015", "F022", "F027"],
+    "verification": [
+      "grep -qi 'picture-in-picture\\|pip' packages/video_player/video_player/README.md",
+      "grep -qi 'picture-in-picture\\|pip' packages/video_player/video_player_android/README.md || true",
+      "grep -qi 'picture-in-picture\\|pip' packages/video_player/video_player_avfoundation/README.md || true",
+      "grep -qi 'picture-in-picture\\|pip' packages/video_player/video_player_web/README.md || true",
+      "grep -qi 'supportsPictureInPicture\\|configChanges' packages/video_player/video_player/README.md"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F029",
+    "category": "widget",
+    "scope": "packages/video_player/video_player/example",
+    "description": "Add PiP controls to the example app. Add a 'Toggle PiP' button that calls startPictureInPicture/stopPictureInPicture based on current state. Add an 'Auto PiP' toggle switch that calls setAutoPictureInPicture. Add an isPictureInPictureActive state display indicator. Add custom action configuration UI allowing users to select which actions to show in PiP. Guard PiP UI behind isPictureInPictureSupported() check (hide PiP controls on unsupported platforms). Use ValueListenableBuilder to reactively update UI when PiP state changes.",
+    "priority": 29,
+    "depends_on": ["F007", "F015", "F022", "F027"],
+    "verification": [
+      "cd packages/video_player/video_player/example && flutter pub get && flutter analyze",
+      "cd packages/video_player/video_player/example && dart format --set-exit-if-changed lib/",
+      "grep -q 'startPictureInPicture\\|PiP\\|pip' packages/video_player/video_player/example/lib/main.dart",
+      "grep -q 'isPictureInPictureActive' packages/video_player/video_player/example/lib/main.dart"
+    ],
+    "passes": false
+  }
+]
