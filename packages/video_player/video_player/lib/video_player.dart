@@ -17,6 +17,8 @@ export 'package:video_player_platform_interface/video_player_platform_interface.
     show
         DataSourceType,
         DurationRange,
+        PictureInPictureAction,
+        PictureInPictureActionType,
         VideoFormat,
         VideoPlayerOptions,
         VideoPlayerWebOptions,
@@ -60,6 +62,7 @@ class VideoPlayerValue {
     this.rotationCorrection = 0,
     this.errorDescription,
     this.isCompleted = false,
+    this.isPictureInPictureActive = false,
   });
 
   /// Returns an instance for a video that hasn't been loaded.
@@ -126,6 +129,9 @@ class VideoPlayerValue {
   /// Does not update if video is looping.
   final bool isCompleted;
 
+  /// True if the video is currently in Picture-in-Picture mode.
+  final bool isPictureInPictureActive;
+
   /// The [size] of the currently loaded video.
   final Size size;
 
@@ -174,6 +180,7 @@ class VideoPlayerValue {
     int? rotationCorrection,
     String? errorDescription = _defaultErrorDescription,
     bool? isCompleted,
+    bool? isPictureInPictureActive,
   }) {
     return VideoPlayerValue(
       duration: duration ?? this.duration,
@@ -193,6 +200,8 @@ class VideoPlayerValue {
           ? errorDescription
           : this.errorDescription,
       isCompleted: isCompleted ?? this.isCompleted,
+      isPictureInPictureActive:
+          isPictureInPictureActive ?? this.isPictureInPictureActive,
     );
   }
 
@@ -212,7 +221,8 @@ class VideoPlayerValue {
         'volume: $volume, '
         'playbackSpeed: $playbackSpeed, '
         'errorDescription: $errorDescription, '
-        'isCompleted: $isCompleted),';
+        'isCompleted: $isCompleted, '
+        'isPictureInPictureActive: $isPictureInPictureActive),';
   }
 
   @override
@@ -234,7 +244,8 @@ class VideoPlayerValue {
           size == other.size &&
           rotationCorrection == other.rotationCorrection &&
           isInitialized == other.isInitialized &&
-          isCompleted == other.isCompleted;
+          isCompleted == other.isCompleted &&
+          isPictureInPictureActive == other.isPictureInPictureActive;
 
   @override
   int get hashCode => Object.hash(
@@ -253,6 +264,7 @@ class VideoPlayerValue {
     rotationCorrection,
     isInitialized,
     isCompleted,
+    isPictureInPictureActive,
   );
 }
 
@@ -733,6 +745,48 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
     value = value.copyWith(playbackSpeed: speed);
     await _applyPlaybackSpeed();
+  }
+
+  /// Returns whether Picture-in-Picture mode is supported.
+  Future<bool> isPictureInPictureSupported() async {
+    if (_isDisposedOrNotInitialized) {
+      return false;
+    }
+    return _videoPlayerPlatform.isPictureInPictureSupported();
+  }
+
+  /// Starts Picture-in-Picture mode.
+  Future<void> startPictureInPicture() async {
+    if (_isDisposedOrNotInitialized) {
+      return;
+    }
+    await _videoPlayerPlatform.startPictureInPicture(_playerId);
+  }
+
+  /// Stops Picture-in-Picture mode.
+  Future<void> stopPictureInPicture() async {
+    if (_isDisposedOrNotInitialized) {
+      return;
+    }
+    await _videoPlayerPlatform.stopPictureInPicture(_playerId);
+  }
+
+  /// Enables or disables automatic entry into Picture-in-Picture mode.
+  Future<void> setAutoPictureInPicture(bool enabled) async {
+    if (_isDisposedOrNotInitialized) {
+      return;
+    }
+    await _videoPlayerPlatform.setAutoPictureInPicture(_playerId, enabled);
+  }
+
+  /// Sets the actions displayed in Picture-in-Picture controls.
+  Future<void> setPictureInPictureActions(
+    List<PictureInPictureAction> actions,
+  ) async {
+    if (_isDisposedOrNotInitialized) {
+      return;
+    }
+    await _videoPlayerPlatform.setPictureInPictureActions(_playerId, actions);
   }
 
   /// Sets the caption offset.
