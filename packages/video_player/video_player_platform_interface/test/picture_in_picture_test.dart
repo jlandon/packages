@@ -38,11 +38,11 @@ void main() {
 
   group('PictureInPictureAction', () {
     test('equal instances compare equal', () {
-      const PictureInPictureAction first = PictureInPictureAction(
+      const first = PictureInPictureAction(
         type: PictureInPictureActionType.play,
         label: 'Play',
       );
-      const PictureInPictureAction second = PictureInPictureAction(
+      const second = PictureInPictureAction(
         type: PictureInPictureActionType.play,
         label: 'Play',
       );
@@ -51,11 +51,11 @@ void main() {
     });
 
     test('instances with different type are not equal', () {
-      const PictureInPictureAction first = PictureInPictureAction(
+      const first = PictureInPictureAction(
         type: PictureInPictureActionType.play,
         label: 'Play',
       );
-      const PictureInPictureAction second = PictureInPictureAction(
+      const second = PictureInPictureAction(
         type: PictureInPictureActionType.pause,
         label: 'Play',
       );
@@ -64,11 +64,11 @@ void main() {
     });
 
     test('instances with different label are not equal', () {
-      const PictureInPictureAction first = PictureInPictureAction(
+      const first = PictureInPictureAction(
         type: PictureInPictureActionType.play,
         label: 'Play',
       );
-      const PictureInPictureAction second = PictureInPictureAction(
+      const second = PictureInPictureAction(
         type: PictureInPictureActionType.play,
         label: 'Pause',
       );
@@ -77,11 +77,11 @@ void main() {
     });
 
     test('equal instances have the same hashCode', () {
-      const PictureInPictureAction first = PictureInPictureAction(
+      const first = PictureInPictureAction(
         type: PictureInPictureActionType.play,
         label: 'Play',
       );
-      const PictureInPictureAction second = PictureInPictureAction(
+      const second = PictureInPictureAction(
         type: PictureInPictureActionType.play,
         label: 'Play',
       );
@@ -90,11 +90,11 @@ void main() {
     });
 
     test('different instances are expected to have different hashCode', () {
-      const PictureInPictureAction first = PictureInPictureAction(
+      const first = PictureInPictureAction(
         type: PictureInPictureActionType.play,
         label: 'Play',
       );
-      const PictureInPictureAction second = PictureInPictureAction(
+      const second = PictureInPictureAction(
         type: PictureInPictureActionType.pause,
         label: 'Pause',
       );
@@ -103,7 +103,7 @@ void main() {
     });
 
     test('toString returns expected format', () {
-      const PictureInPictureAction action = PictureInPictureAction(
+      const action = PictureInPictureAction(
         type: PictureInPictureActionType.play,
         label: 'Play',
       );
