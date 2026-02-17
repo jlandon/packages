@@ -46,7 +46,7 @@
       "grep -q '6.7.0' packages/video_player/video_player_platform_interface/CHANGELOG.md",
       "grep -qi 'picture-in-picture\\|pip' packages/video_player/video_player_platform_interface/CHANGELOG.md"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "id": "F004",

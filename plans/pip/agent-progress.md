@@ -2,7 +2,7 @@
 
 **Task:** Add Picture-in-Picture (PiP) support to the `video_player` federated plugin across Android, iOS, macOS, and Web platforms.
 
-**Features complete: 2 / 29**
+**Features complete: 3 / 29**
 
 **Last session:** 2026-02-17
 
@@ -12,7 +12,7 @@
 | ---- | ---------------------------------------------------------------------- | ------- |
 | F001 | Platform interface: PiP data models, event types, and abstract methods | done    |
 | F002 | Platform interface: Unit tests for PiP additions                       | done    |
-| F003 | Platform interface: Version bump and CHANGELOG                         | pending |
+| F003 | Platform interface: Version bump and CHANGELOG                         | done    |
 | F004 | App-facing: VideoPlayerValue and VideoPlayerController PiP API         | pending |
 | F005 | App-facing: PiP event handling, lifecycle observer, dispose            | pending |
 | F006 | App-facing: Unit tests for PiP features                                | pending |
@@ -40,7 +40,7 @@
 | F028 | Documentation: README updates and platform setup guides                | pending |
 | F029 | Documentation: Example app PiP controls                                | pending |
 
-**Next recommended:** F003 (Platform interface: Version bump and CHANGELOG)
+**Next recommended:** F004 (App-facing: VideoPlayerValue and VideoPlayerController PiP API)
 
 ## Session Log
 
@@ -57,3 +57,10 @@
 - **Commits:** `9f4177637` (agent: impl F002 — add PiP platform interface unit tests), `3aeef1442` (agent: fix F002 — remove explicit type annotations to satisfy omit_obvious_local_variable_types lint)
 - **Details:** Added `picture_in_picture_test.dart` with tests for `PictureInPictureActionType` enum values, `PictureInPictureAction` equality/hashCode/toString, and `VideoEventType` PiP events. Added default implementation tests in `video_player_platform_interface_test.dart` for `isPictureInPictureSupported` (returns false), `startPictureInPicture`, `stopPictureInPicture`, `setAutoPictureInPicture`, and `setPictureInPictureActions` (throw `UnimplementedError`). All 30 tests pass.
 - **Issues:** Minor lint fix needed for `omit_obvious_local_variable_types` (resolved in second commit). One low-severity QA note: hashCode inequality test is technically not guaranteed by contract but unlikely to be flaky in practice.
+
+### Session 3 — 2026-02-17
+
+- **Completed:** F003 — Platform interface: Version bump and CHANGELOG
+- **Commit:** `872f4dc29` (agent: impl F003 — bump platform interface to 6.7.0 for PiP APIs)
+- **Details:** Bumped `video_player_platform_interface` version from 6.6.0 to 6.7.0 in `pubspec.yaml`. Updated `CHANGELOG.md` replacing `## NEXT` with `## 6.7.0` and added entry describing the new Picture-in-Picture APIs: `PictureInPictureActionType` enum, `PictureInPictureAction` class, new event types, and five new `VideoPlayerPlatform` methods.
+- **Issues:** One low-severity QA note: changelog bullet style was changed from `*` to `-` across the entire file; this is a cosmetic difference with no functional impact.
