@@ -9,7 +9,7 @@ import android.app.PictureInPictureParams;
 import android.app.RemoteAction;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentCallbacks2;
+import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -18,6 +18,7 @@ import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.util.LongSparseArray;
 import android.util.Rational;
+import androidx.media3.common.VideoSize;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
@@ -46,6 +47,7 @@ public class VideoPlayerPlugin implements FlutterPlugin, ActivityAware, AndroidV
   private boolean isInPictureInPictureMode = false;
   private final LongSparseArray<Boolean> autoPipPlayers = new LongSparseArray<>();
   @Nullable private BroadcastReceiver pipActionReceiver;
+  @Nullable private ComponentCallbacks pipComponentCallbacks;
 
   /** Register this with the v2 embedding for the plugin to respond to lifecycle callbacks. */
   public VideoPlayerPlugin() {}
@@ -215,21 +217,58 @@ public class VideoPlayerPlugin implements FlutterPlugin, ActivityAware, AndroidV
   @Override
   public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
     activity = binding.getActivity();
+    registerPipComponentCallbacks();
   }
 
   @Override
   public void onDetachedFromActivityForConfigChanges() {
+    unregisterPipComponentCallbacks();
     activity = null;
   }
 
   @Override
   public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
     activity = binding.getActivity();
+    registerPipComponentCallbacks();
   }
 
   @Override
   public void onDetachedFromActivity() {
+    unregisterPipComponentCallbacks();
     activity = null;
+  }
+
+  private void registerPipComponentCallbacks() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || activity == null) {
+      return;
+    }
+    pipComponentCallbacks = new ComponentCallbacks() {
+      @Override
+      public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        boolean currentlyInPip = checkIsInPictureInPictureMode();
+        if (currentlyInPip != isInPictureInPictureMode) {
+          isInPictureInPictureMode = currentlyInPip;
+          notifyPictureInPictureModeChanged(currentlyInPip);
+        }
+      }
+
+      @Override
+      public void onLowMemory() {}
+    };
+    activity.registerComponentCallbacks(pipComponentCallbacks);
+  }
+
+  private void unregisterPipComponentCallbacks() {
+    if (pipComponentCallbacks != null && activity != null) {
+      activity.unregisterComponentCallbacks(pipComponentCallbacks);
+      pipComponentCallbacks = null;
+    }
+  }
+
+  private void notifyPictureInPictureModeChanged(boolean isInPip) {
+    for (int i = 0; i < videoPlayers.size(); i++) {
+      videoPlayers.valueAt(i).videoPlayerEvents.onPictureInPictureModeChanged(isInPip);
+    }
   }
 
   @Override
@@ -243,7 +282,7 @@ public class VideoPlayerPlugin implements FlutterPlugin, ActivityAware, AndroidV
       return;
     }
     PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder();
-    builder.setAspectRatio(new Rational(16, 9));
+    builder.setAspectRatio(getVideoAspectRatio(playerId));
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
       builder.setAutoEnterEnabled(false);
     }
@@ -251,7 +290,11 @@ public class VideoPlayerPlugin implements FlutterPlugin, ActivityAware, AndroidV
     if (!remoteActions.isEmpty()) {
       builder.setActions(remoteActions);
     }
-    activity.enterPictureInPictureMode(builder.build());
+    boolean entered = activity.enterPictureInPictureMode(builder.build());
+    if (entered && !isInPictureInPictureMode) {
+      isInPictureInPictureMode = true;
+      notifyPictureInPictureModeChanged(true);
+    }
   }
 
   @Override
@@ -267,7 +310,7 @@ public class VideoPlayerPlugin implements FlutterPlugin, ActivityAware, AndroidV
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && activity != null) {
       PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder();
       builder.setAutoEnterEnabled(enabled);
-      builder.setAspectRatio(new Rational(16, 9));
+      builder.setAspectRatio(getVideoAspectRatio(playerId));
       activity.setPictureInPictureParams(builder.build());
     }
   }
@@ -280,7 +323,7 @@ public class VideoPlayerPlugin implements FlutterPlugin, ActivityAware, AndroidV
     List<RemoteAction> remoteActions = buildRemoteActions(actions);
     PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder();
     builder.setActions(remoteActions);
-    builder.setAspectRatio(new Rational(16, 9));
+    builder.setAspectRatio(getVideoAspectRatio(playerId));
     activity.setPictureInPictureParams(builder.build());
   }
 
@@ -331,10 +374,18 @@ public class VideoPlayerPlugin implements FlutterPlugin, ActivityAware, AndroidV
     return remoteActions;
   }
 
-  /**
-   * Checks if the activity is currently in Picture-in-Picture mode.
-   * Uses isInPictureInPictureMode from the Activity API.
-   */
+  @NonNull
+  private Rational getVideoAspectRatio(long playerId) {
+    VideoPlayer player = videoPlayers.get(playerId);
+    if (player != null) {
+      VideoSize videoSize = player.getExoPlayer().getVideoSize();
+      if (videoSize.width > 0 && videoSize.height > 0) {
+        return new Rational(videoSize.width, videoSize.height);
+      }
+    }
+    return new Rational(16, 9);
+  }
+
   private boolean checkIsInPictureInPictureMode() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && activity != null) {
       return activity.isInPictureInPictureMode();

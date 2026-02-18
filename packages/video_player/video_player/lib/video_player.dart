@@ -1000,8 +1000,15 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    if (_playerId == VideoPlayerController.kUninitializedPlayerId ||
-        _isPictureInPictureActive) {
+    if (_playerId == VideoPlayerController.kUninitializedPlayerId) {
+      return Container();
+    }
+    // On Android, PiP is Activity-level: the entire Activity content shrinks
+    // into the PiP window, so the video texture must remain visible.
+    // On iOS/macOS/web, PiP creates a separate system overlay, so hiding the
+    // main widget avoids duplicate rendering.
+    if (_isPictureInPictureActive &&
+        defaultTargetPlatform != TargetPlatform.android) {
       return Container();
     }
     return _VideoPlayerWithRotation(

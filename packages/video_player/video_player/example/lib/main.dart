@@ -8,6 +8,7 @@
 /// video.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -222,6 +223,7 @@ class _ButterFlyAssetVideo extends StatefulWidget {
 
 class _ButterFlyAssetVideoState extends State<_ButterFlyAssetVideo> {
   late VideoPlayerController _controller;
+  OverlayEntry? _pipOverlay;
 
   @override
   void initState() {
@@ -234,14 +236,43 @@ class _ButterFlyAssetVideoState extends State<_ButterFlyAssetVideo> {
 
     _controller.addListener(() {
       setState(() {});
+      _updatePipOverlay();
     });
     _controller.setLooping(true);
     _controller.initialize().then((_) => setState(() {}));
     _controller.play();
   }
 
+  void _updatePipOverlay() {
+    if (!mounted) {
+      return;
+    }
+    final bool isPip = _controller.value.isPictureInPictureActive;
+    if (isPip &&
+        _pipOverlay == null &&
+        defaultTargetPlatform == TargetPlatform.android) {
+      _pipOverlay = OverlayEntry(
+        builder: (_) => ColoredBox(
+          color: Colors.black,
+          child: Center(
+            child: AspectRatio(
+              aspectRatio: _controller.value.aspectRatio,
+              child: VideoPlayer(_controller),
+            ),
+          ),
+        ),
+      );
+      Overlay.of(context).insert(_pipOverlay!);
+    } else if (!isPip && _pipOverlay != null) {
+      _pipOverlay?.remove();
+      _pipOverlay = null;
+    }
+  }
+
   @override
   void dispose() {
+    _pipOverlay?.remove();
+    _pipOverlay = null;
     _controller.dispose();
     super.dispose();
   }
@@ -284,6 +315,7 @@ class _BumbleBeeRemoteVideo extends StatefulWidget {
 
 class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
   late VideoPlayerController _controller;
+  OverlayEntry? _pipOverlay;
 
   Future<ClosedCaptionFile> _loadCaptions() async {
     final String fileContents = await DefaultAssetBundle.of(
@@ -311,13 +343,42 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
 
     _controller.addListener(() {
       setState(() {});
+      _updatePipOverlay();
     });
     _controller.setLooping(true);
     _controller.initialize();
   }
 
+  void _updatePipOverlay() {
+    if (!mounted) {
+      return;
+    }
+    final bool isPip = _controller.value.isPictureInPictureActive;
+    if (isPip &&
+        _pipOverlay == null &&
+        defaultTargetPlatform == TargetPlatform.android) {
+      _pipOverlay = OverlayEntry(
+        builder: (_) => ColoredBox(
+          color: Colors.black,
+          child: Center(
+            child: AspectRatio(
+              aspectRatio: _controller.value.aspectRatio,
+              child: VideoPlayer(_controller),
+            ),
+          ),
+        ),
+      );
+      Overlay.of(context).insert(_pipOverlay!);
+    } else if (!isPip && _pipOverlay != null) {
+      _pipOverlay?.remove();
+      _pipOverlay = null;
+    }
+  }
+
   @override
   void dispose() {
+    _pipOverlay?.remove();
+    _pipOverlay = null;
     _controller.dispose();
     super.dispose();
   }

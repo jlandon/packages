@@ -88,4 +88,26 @@ public final class VideoPlayerEventCallbacksTest {
     IsPlayingStateEvent expected = new IsPlayingStateEvent(true);
     assertEquals(expected, actual);
   }
+
+  @Test
+  public void onPictureInPictureModeChangedStarted() {
+    eventCallbacks.onPictureInPictureModeChanged(true);
+
+    verify(mockEventSink).success(eventCaptor.capture());
+
+    PlatformVideoEvent actual = eventCaptor.getValue();
+    PictureInPictureStateEvent expected = new PictureInPictureStateEvent(true);
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void onPictureInPictureModeChangedStopped() {
+    eventCallbacks.onPictureInPictureModeChanged(false);
+
+    verify(mockEventSink).success(eventCaptor.capture());
+
+    PlatformVideoEvent actual = eventCaptor.getValue();
+    PictureInPictureStateEvent expected = new PictureInPictureStateEvent(false);
+    assertEquals(expected, actual);
+  }
 }
