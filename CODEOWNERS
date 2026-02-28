@@ -119,6 +119,7 @@ packages/local_auth/local_auth_windows/**                     @stuartmorgan-g
 packages/path_provider/path_provider_windows/**               @stuartmorgan-g
 packages/shared_preferences/shared_preferences_windows/**     @stuartmorgan-g
 packages/url_launcher/url_launcher_windows/**                 @stuartmorgan-g
+packages/video_player/video_player_windows/**                 @stuartmorgan-g
 
 # - DevTools extensions
 # @adsonpleal is the actual maintainer of shared_preferences_tool but is not yet a committer, so can't be listed as the owner.
