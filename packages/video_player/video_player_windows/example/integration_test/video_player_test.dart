@@ -33,9 +33,7 @@ void main() {
   });
 
   testWidgets('can initialize from asset', (WidgetTester tester) async {
-    final controller = MiniController.asset(
-      'assets/Butterfly-209.mp4',
-    );
+    final controller = MiniController.asset('assets/Butterfly-209.mp4');
     await controller.initialize();
 
     expect(controller.value.isInitialized, true);

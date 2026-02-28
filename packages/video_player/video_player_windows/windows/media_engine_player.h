@@ -65,6 +65,7 @@ class MediaEnginePlayer : public IMFMediaEngineNotify {
   // Property getters.
   int64_t GetDuration() const;
   int64_t GetCurrentPosition() const;
+  int64_t GetBufferedPosition() const;
   void GetVideoSize(DWORD* width, DWORD* height) const;
 
   // Property setters.

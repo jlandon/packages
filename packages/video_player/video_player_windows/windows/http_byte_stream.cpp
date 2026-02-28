@@ -267,18 +267,42 @@ STDMETHODIMP HttpByteStream::BeginRead(BYTE* buffer, ULONG cb,
 
   // Capture the this pointer and ensure ref counting.
   AddRef();
-  auto future = std::async(std::launch::async, [=]() {
-    ULONG read_len = 0;
-    Read(buffer, cb, &read_len);
+  HANDLE thread = CreateThread(
+      nullptr, 0,
+      [](LPVOID param) -> DWORD {
+        auto* args =
+            static_cast<std::tuple<HttpByteStream*, BYTE*, ULONG,
+                                   IMFAsyncCallback*, IUnknown*>*>(param);
+        auto* stream = std::get<0>(*args);
+        auto* buffer = std::get<1>(*args);
+        auto cb = std::get<2>(*args);
+        auto* callback = std::get<3>(*args);
+        auto* state = std::get<4>(*args);
 
-    auto data = new DataUnknown(read_len);
-    IMFAsyncResult* async_result = nullptr;
-    MFCreateAsyncResult(data, callback, state, &async_result);
-    data->Release();
-    MFInvokeCallback(async_result);
-    async_result->Release();
+        ULONG read_len = 0;
+        stream->Read(buffer, cb, &read_len);
+
+        auto data = new DataUnknown(read_len);
+        IMFAsyncResult* async_result = nullptr;
+        MFCreateAsyncResult(data, callback, state, &async_result);
+        data->Release();
+        MFInvokeCallback(async_result);
+        async_result->Release();
+        stream->Release();
+
+        delete args;
+        return 0;
+      },
+      new std::tuple<HttpByteStream*, BYTE*, ULONG, IMFAsyncCallback*,
+                     IUnknown*>(this, buffer, cb, callback, state),
+      0, nullptr);
+
+  if (thread) {
+    CloseHandle(thread);
+  } else {
     Release();
-  });
+    return E_FAIL;
+  }
 
   return S_OK;
 }

@@ -59,7 +59,7 @@ class PlayerInstanceApiHandler : public VideoPlayerInstanceApi {
   }
 
   ErrorOr<int64_t> GetBufferedPosition() override {
-    return static_cast<int64_t>(player_->GetCurrentPosition());
+    return static_cast<int64_t>(player_->GetBufferedPosition());
   }
 
  private:
@@ -169,10 +169,11 @@ void VideoPlayerWindowsPlugin::Create(
 
   // Set up the player entry.
   auto entry = std::make_unique<PlayerEntry>();
-  entry->player = std::move(player);
+  entry->player = player.release();
   entry->texture_id = texture_id;
+  entry->texture_variant = std::move(texture_variant);
 
-  MediaEnginePlayer* raw_player = entry->player.get();
+  MediaEnginePlayer* raw_player = entry->player;
   flutter::TextureRegistrar* tex_reg = texture_registrar_;
 
   // Set up callbacks for the player.
@@ -183,18 +184,20 @@ void VideoPlayerWindowsPlugin::Create(
         SendVideoEvent(texture_id, event_data);
       });
 
+  // Set up per-player instance API.
+  auto instance_handler =
+      std::make_unique<PlayerInstanceApiHandler>(raw_player);
+  VideoPlayerInstanceApi::SetUp(messenger_, instance_handler.get(),
+                                std::to_string(texture_id));
+  entry->instance_handler = std::move(instance_handler);
+
   {
     std::lock_guard<std::mutex> lock(players_mutex_);
     players_[texture_id] = std::move(entry);
   }
 
-  // Set up the event channel and per-player instance API.
+  // Set up the event channel.
   SetupEventChannel(texture_id);
-
-  auto instance_handler =
-      std::make_unique<PlayerInstanceApiHandler>(raw_player);
-  VideoPlayerInstanceApi::SetUp(messenger_, instance_handler.get(),
-                                std::to_string(texture_id));
 
   // Open the video URL asynchronously.
   HWND hwnd = registrar_->GetView()->GetNativeWindow();
@@ -210,6 +213,7 @@ void VideoPlayerWindowsPlugin::Create(
   if (FAILED(hr)) {
     result(
         FlutterError("video_open_failed", "Failed to initiate video loading."));
+    return;
   }
 }
 

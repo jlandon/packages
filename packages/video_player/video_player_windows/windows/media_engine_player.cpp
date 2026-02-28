@@ -41,6 +41,10 @@ MediaEnginePlayer::~MediaEnginePlayer() {
     CloseHandle(playing_event_);
     playing_event_ = nullptr;
   }
+  if (power_request_ != INVALID_HANDLE_VALUE) {
+    CloseHandle(power_request_);
+    power_request_ = INVALID_HANDLE_VALUE;
+  }
   if (adapter_) {
     adapter_->Release();
     adapter_ = nullptr;
@@ -309,8 +313,7 @@ done:
     factory->Release();
   }
 
-  if (FAILED(hr) && load_callback_) {
-    load_callback_(false);
+  if (FAILED(hr)) {
     load_callback_ = nullptr;
   }
 
@@ -345,6 +348,26 @@ int64_t MediaEnginePlayer::GetDuration() const {
 int64_t MediaEnginePlayer::GetCurrentPosition() const {
   if (!engine_) return -1;
   return static_cast<int64_t>(engine_->GetCurrentTime() * 1000);
+}
+
+int64_t MediaEnginePlayer::GetBufferedPosition() const {
+  if (!engine_) return -1;
+  IMFMediaTimeRange* buffered = nullptr;
+  HRESULT hr = engine_->GetBuffered(&buffered);
+  if (FAILED(hr) || !buffered) return -1;
+
+  DWORD range_count = buffered->GetLength();
+  if (range_count == 0) {
+    buffered->Release();
+    return -1;
+  }
+
+  double end_time = 0;
+  hr = buffered->GetEnd(range_count - 1, &end_time);
+  buffered->Release();
+
+  if (FAILED(hr)) return -1;
+  return static_cast<int64_t>(end_time * 1000);
 }
 
 void MediaEnginePlayer::GetVideoSize(DWORD* width, DWORD* height) const {

@@ -20,12 +20,21 @@ namespace video_player_windows {
 
 // Represents a single video player instance along with its event channel.
 struct PlayerEntry {
-  std::unique_ptr<MediaEnginePlayer> player;
+  MediaEnginePlayer* player = nullptr;
   std::unique_ptr<flutter::EventChannel<flutter::EncodableValue>> event_channel;
   std::unique_ptr<flutter::StreamHandler<flutter::EncodableValue>>
       stream_handler;
   flutter::EventSink<flutter::EncodableValue>* event_sink = nullptr;
   int64_t texture_id = -1;
+  std::unique_ptr<flutter::TextureVariant> texture_variant;
+  std::unique_ptr<VideoPlayerInstanceApi> instance_handler;
+
+  ~PlayerEntry() {
+    if (player) {
+      player->Release();
+      player = nullptr;
+    }
+  }
 };
 
 // A stream handler that forwards events to the plugin's event sink.
