@@ -58,9 +58,8 @@ bool HttpConnection::Open(const std::wstring& url,
     return false;
   }
 
-  DWORD flags = (url_comp.nScheme == INTERNET_SCHEME_HTTPS)
-                    ? WINHTTP_FLAG_SECURE
-                    : 0;
+  DWORD flags =
+      (url_comp.nScheme == INTERNET_SCHEME_HTTPS) ? WINHTTP_FLAG_SECURE : 0;
   request_ = WinHttpOpenRequest(connection_, L"GET", url_comp.lpszUrlPath,
                                 nullptr, WINHTTP_NO_REFERER, nullptr, flags);
   if (!request_) {
@@ -72,7 +71,8 @@ bool HttpConnection::Open(const std::wstring& url,
   if (start_position > 0) {
     wchar_t range_header[64];
     swprintf(range_header, sizeof(range_header) / sizeof(wchar_t),
-             L"Range: bytes=%llu-", static_cast<unsigned long long>(start_position));
+             L"Range: bytes=%llu-",
+             static_cast<unsigned long long>(start_position));
     WinHttpAddRequestHeaders(request_, range_header,
                              static_cast<DWORD>(wcslen(range_header)),
                              WINHTTP_ADDREQ_FLAG_ADD);
@@ -80,9 +80,9 @@ bool HttpConnection::Open(const std::wstring& url,
 
   // Add custom headers.
   for (const auto& header : headers) {
-    if (!WinHttpAddRequestHeaders(
-            request_, header.c_str(), static_cast<DWORD>(header.length()),
-            WINHTTP_ADDREQ_FLAG_ADD)) {
+    if (!WinHttpAddRequestHeaders(request_, header.c_str(),
+                                  static_cast<DWORD>(header.length()),
+                                  WINHTTP_ADDREQ_FLAG_ADD)) {
       Close();
       return false;
     }
@@ -124,9 +124,8 @@ long HttpConnection::GetContentLength() {
   DWORD content_length = 0;
   DWORD length = sizeof(content_length);
   if (WinHttpQueryHeaders(
-          request_,
-          WINHTTP_QUERY_CONTENT_LENGTH | WINHTTP_QUERY_FLAG_NUMBER, nullptr,
-          &content_length, &length, nullptr)) {
+          request_, WINHTTP_QUERY_CONTENT_LENGTH | WINHTTP_QUERY_FLAG_NUMBER,
+          nullptr, &content_length, &length, nullptr)) {
     return static_cast<long>(content_length);
   }
   return -1;
@@ -242,8 +241,7 @@ STDMETHODIMP HttpByteStream::IsEndOfStream(BOOL* end_of_stream) {
   return S_OK;
 }
 
-STDMETHODIMP HttpByteStream::Read(BYTE* buffer, ULONG cb,
-                                  ULONG* bytes_read) {
+STDMETHODIMP HttpByteStream::Read(BYTE* buffer, ULONG cb, ULONG* bytes_read) {
   if (!connection_) {
     if (!OpenConnection(position_)) return E_FAIL;
   }

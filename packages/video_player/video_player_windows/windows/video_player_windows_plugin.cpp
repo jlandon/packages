@@ -8,9 +8,8 @@
 #include <flutter/method_channel.h>
 #include <flutter/plugin_registrar_windows.h>
 #include <flutter/standard_method_codec.h>
-#include <windows.h>
-
 #include <mfapi.h>
+#include <windows.h>
 
 #include <memory>
 #include <sstream>
@@ -69,8 +68,7 @@ class PlayerInstanceApiHandler : public VideoPlayerInstanceApi {
 
 // VideoPlayerStreamHandler implementation.
 VideoPlayerStreamHandler::VideoPlayerStreamHandler(
-    std::function<void(flutter::EventSink<flutter::EncodableValue>*)>
-        on_listen,
+    std::function<void(flutter::EventSink<flutter::EncodableValue>*)> on_listen,
     std::function<void()> on_cancel)
     : on_listen_(std::move(on_listen)), on_cancel_(std::move(on_cancel)) {}
 
@@ -140,9 +138,8 @@ void VideoPlayerWindowsPlugin::Create(
   auto texture_variant =
       std::make_unique<flutter::TextureVariant>(flutter::GpuSurfaceTexture(
           kFlutterDesktopGpuSurfaceTypeDxgiSharedHandle,
-          [raw_player =
-               player.get()](size_t width,
-                             size_t height) -> const FlutterDesktopGpuSurfaceDescriptor* {
+          [raw_player = player.get()](size_t width, size_t height)
+              -> const FlutterDesktopGpuSurfaceDescriptor* {
             return raw_player->GetSurfaceDescriptor();
           }));
 
@@ -166,8 +163,7 @@ void VideoPlayerWindowsPlugin::Create(
 
   // Convert URI to wide string.
   const std::string& uri = options.uri();
-  int wide_len =
-      MultiByteToWideChar(CP_UTF8, 0, uri.c_str(), -1, nullptr, 0);
+  int wide_len = MultiByteToWideChar(CP_UTF8, 0, uri.c_str(), -1, nullptr, 0);
   std::wstring wide_uri(wide_len, L'\0');
   MultiByteToWideChar(CP_UTF8, 0, uri.c_str(), -1, &wide_uri[0], wide_len);
 
@@ -203,19 +199,17 @@ void VideoPlayerWindowsPlugin::Create(
   // Open the video URL asynchronously.
   HWND hwnd = registrar_->GetView()->GetNativeWindow();
   HRESULT hr = raw_player->OpenURL(
-      wide_uri.c_str(), hwnd, header_lines,
-      [result, texture_id](bool success) {
+      wide_uri.c_str(), hwnd, header_lines, [result, texture_id](bool success) {
         if (success) {
           result(texture_id);
         } else {
-          result(FlutterError("video_open_failed",
-                              "Failed to open video."));
+          result(FlutterError("video_open_failed", "Failed to open video."));
         }
       });
 
   if (FAILED(hr)) {
-    result(FlutterError("video_open_failed",
-                        "Failed to initiate video loading."));
+    result(
+        FlutterError("video_open_failed", "Failed to initiate video loading."));
   }
 }
 
@@ -246,8 +240,7 @@ std::optional<FlutterError> VideoPlayerWindowsPlugin::SetMixWithOthers(
 }
 
 ErrorOr<std::string> VideoPlayerWindowsPlugin::GetAssetUrl(
-    const std::string& asset,
-    const std::string* package_name) {
+    const std::string& asset, const std::string* package_name) {
   // Construct the path to the asset relative to the executable.
   // On Windows, assets are located in data/flutter_assets/ next to the
   // executable.
@@ -261,11 +254,11 @@ ErrorOr<std::string> VideoPlayerWindowsPlugin::GetAssetUrl(
   std::wstring full_path = dir + L"\\data\\flutter_assets\\" + wide_asset;
 
   // Convert back to UTF-8.
-  int utf8_len = WideCharToMultiByte(CP_UTF8, 0, full_path.c_str(), -1,
-                                     nullptr, 0, nullptr, nullptr);
+  int utf8_len = WideCharToMultiByte(CP_UTF8, 0, full_path.c_str(), -1, nullptr,
+                                     0, nullptr, nullptr);
   std::string result(utf8_len, '\0');
-  WideCharToMultiByte(CP_UTF8, 0, full_path.c_str(), -1, &result[0],
-                      utf8_len, nullptr, nullptr);
+  WideCharToMultiByte(CP_UTF8, 0, full_path.c_str(), -1, &result[0], utf8_len,
+                      nullptr, nullptr);
   // Remove trailing null.
   if (!result.empty() && result.back() == '\0') {
     result.pop_back();
@@ -321,8 +314,7 @@ void VideoPlayerWindowsPlugin::SetupEventChannel(int64_t player_id) {
 }
 
 void VideoPlayerWindowsPlugin::SendVideoEvent(
-    int64_t player_id,
-    const flutter::EncodableMap& event) {
+    int64_t player_id, const flutter::EncodableMap& event) {
   std::lock_guard<std::mutex> lock(players_mutex_);
   auto it = players_.find(player_id);
   if (it != players_.end() && it->second->event_sink != nullptr) {

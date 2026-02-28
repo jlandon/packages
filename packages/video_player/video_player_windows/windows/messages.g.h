@@ -17,17 +17,16 @@
 
 namespace video_player_windows {
 
-
 // Generated class from Pigeon.
 
 class FlutterError {
  public:
-  explicit FlutterError(const std::string& code)
-    : code_(code) {}
+  explicit FlutterError(const std::string& code) : code_(code) {}
   explicit FlutterError(const std::string& code, const std::string& message)
-    : code_(code), message_(message) {}
-  explicit FlutterError(const std::string& code, const std::string& message, const flutter::EncodableValue& details)
-    : code_(code), message_(message), details_(details) {}
+      : code_(code), message_(message) {}
+  explicit FlutterError(const std::string& code, const std::string& message,
+                        const flutter::EncodableValue& details)
+      : code_(code), message_(message), details_(details) {}
 
   const std::string& code() const { return code_; }
   const std::string& message() const { return message_; }
@@ -39,7 +38,8 @@ class FlutterError {
   flutter::EncodableValue details_;
 };
 
-template<class T> class ErrorOr {
+template <class T>
+class ErrorOr {
  public:
   ErrorOr(const T& rhs) : v_(rhs) {}
   ErrorOr(const T&& rhs) : v_(std::move(rhs)) {}
@@ -59,17 +59,14 @@ template<class T> class ErrorOr {
   std::variant<T, FlutterError> v_;
 };
 
-
-
 // Options for creating a new video player.
 //
 // Generated class from Pigeon that represents data sent in messages.
 class CreationOptions {
  public:
   // Constructs an object setting all fields.
-  explicit CreationOptions(
-    const std::string& uri,
-    const flutter::EncodableMap& http_headers);
+  explicit CreationOptions(const std::string& uri,
+                           const flutter::EncodableMap& http_headers);
 
   // The URI of the video to play.
   const std::string& uri() const;
@@ -89,7 +86,6 @@ class CreationOptions {
   flutter::EncodableMap http_headers_;
 };
 
-
 class PigeonInternalCodecSerializer : public flutter::StandardCodecSerializer {
  public:
   PigeonInternalCodecSerializer();
@@ -98,18 +94,18 @@ class PigeonInternalCodecSerializer : public flutter::StandardCodecSerializer {
     return sInstance;
   }
 
-  void WriteValue(
-    const flutter::EncodableValue& value,
-    flutter::ByteStreamWriter* stream) const override;
+  void WriteValue(const flutter::EncodableValue& value,
+                  flutter::ByteStreamWriter* stream) const override;
+
  protected:
   flutter::EncodableValue ReadValueOfType(
-    uint8_t type,
-    flutter::ByteStreamReader* stream) const override;
+      uint8_t type, flutter::ByteStreamReader* stream) const override;
 };
 
 // The plugin-level API for the Windows video player.
 //
-// Generated interface from Pigeon that represents a handler of messages from Flutter.
+// Generated interface from Pigeon that represents a handler of messages from
+// Flutter.
 class WindowsVideoPlayerApi {
  public:
   WindowsVideoPlayerApi(const WindowsVideoPlayerApi&) = delete;
@@ -118,36 +114,36 @@ class WindowsVideoPlayerApi {
   // Initializes the plugin and disposes all existing players.
   virtual std::optional<FlutterError> Initialize() = 0;
   // Creates a new player and returns its texture ID (used as player ID).
-  virtual void Create(
-    const CreationOptions& options,
-    std::function<void(ErrorOr<int64_t> reply)> result) = 0;
+  virtual void Create(const CreationOptions& options,
+                      std::function<void(ErrorOr<int64_t> reply)> result) = 0;
   // Disposes a player with the given ID.
   virtual std::optional<FlutterError> Dispose(int64_t player_id) = 0;
   // Sets whether audio should mix with other audio sources.
-  virtual std::optional<FlutterError> SetMixWithOthers(bool mix_with_others) = 0;
+  virtual std::optional<FlutterError> SetMixWithOthers(
+      bool mix_with_others) = 0;
   // Returns the asset file path for the given asset name.
-  virtual ErrorOr<std::string> GetAssetUrl(
-    const std::string& asset,
-    const std::string* package_name) = 0;
+  virtual ErrorOr<std::string> GetAssetUrl(const std::string& asset,
+                                           const std::string* package_name) = 0;
 
   // The codec used by WindowsVideoPlayerApi.
   static const flutter::StandardMessageCodec& GetCodec();
-  // Sets up an instance of `WindowsVideoPlayerApi` to handle messages through the `binary_messenger`.
-  static void SetUp(
-    flutter::BinaryMessenger* binary_messenger,
-    WindowsVideoPlayerApi* api);
-  static void SetUp(
-    flutter::BinaryMessenger* binary_messenger,
-    WindowsVideoPlayerApi* api,
-    const std::string& message_channel_suffix);
+  // Sets up an instance of `WindowsVideoPlayerApi` to handle messages through
+  // the `binary_messenger`.
+  static void SetUp(flutter::BinaryMessenger* binary_messenger,
+                    WindowsVideoPlayerApi* api);
+  static void SetUp(flutter::BinaryMessenger* binary_messenger,
+                    WindowsVideoPlayerApi* api,
+                    const std::string& message_channel_suffix);
   static flutter::EncodableValue WrapError(std::string_view error_message);
   static flutter::EncodableValue WrapError(const FlutterError& error);
+
  protected:
   WindowsVideoPlayerApi() = default;
 };
 // The per-player API for the Windows video player.
 //
-// Generated interface from Pigeon that represents a handler of messages from Flutter.
+// Generated interface from Pigeon that represents a handler of messages from
+// Flutter.
 class VideoPlayerInstanceApi {
  public:
   VideoPlayerInstanceApi(const VideoPlayerInstanceApi&) = delete;
@@ -172,16 +168,16 @@ class VideoPlayerInstanceApi {
 
   // The codec used by VideoPlayerInstanceApi.
   static const flutter::StandardMessageCodec& GetCodec();
-  // Sets up an instance of `VideoPlayerInstanceApi` to handle messages through the `binary_messenger`.
-  static void SetUp(
-    flutter::BinaryMessenger* binary_messenger,
-    VideoPlayerInstanceApi* api);
-  static void SetUp(
-    flutter::BinaryMessenger* binary_messenger,
-    VideoPlayerInstanceApi* api,
-    const std::string& message_channel_suffix);
+  // Sets up an instance of `VideoPlayerInstanceApi` to handle messages through
+  // the `binary_messenger`.
+  static void SetUp(flutter::BinaryMessenger* binary_messenger,
+                    VideoPlayerInstanceApi* api);
+  static void SetUp(flutter::BinaryMessenger* binary_messenger,
+                    VideoPlayerInstanceApi* api,
+                    const std::string& message_channel_suffix);
   static flutter::EncodableValue WrapError(std::string_view error_message);
   static flutter::EncodableValue WrapError(const FlutterError& error);
+
  protected:
   VideoPlayerInstanceApi() = default;
 };

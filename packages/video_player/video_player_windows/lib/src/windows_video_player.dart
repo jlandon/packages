@@ -174,10 +174,8 @@ class WindowsVideoPlayer extends VideoPlayerPlatform {
 /// An instance of a video player, corresponding to a single player ID in
 /// [WindowsVideoPlayer].
 class _PlayerInstance {
-  _PlayerInstance(
-    this._api, {
-    required EventChannel eventChannel,
-  }) : _eventChannel = eventChannel;
+  _PlayerInstance(this._api, {required EventChannel eventChannel})
+    : _eventChannel = eventChannel;
 
   final VideoPlayerInstanceApi _api;
   final EventChannel _eventChannel;

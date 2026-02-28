@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 #include "media_engine_player.h"
 
-#include "http_byte_stream.h"
-
 #include <d3d11.h>
 #include <dxgi.h>
 #include <mfapi.h>
@@ -12,6 +10,8 @@
 #include <windows.h>
 
 #include <iostream>
+
+#include "http_byte_stream.h"
 
 #pragma comment(lib, "D3D11")
 #pragma comment(lib, "mfplat")
@@ -21,9 +21,9 @@
 namespace video_player_windows {
 
 // Helper macro for HRESULT checking.
-#define CHECK_HR(x)   \
-  if (FAILED(x)) {    \
-    goto done;         \
+#define CHECK_HR(x) \
+  if (FAILED(x)) {  \
+    goto done;      \
   }
 
 MediaEnginePlayer::MediaEnginePlayer(IDXGIAdapter* adapter)
@@ -77,8 +77,7 @@ HRESULT MediaEnginePlayer::InitD3D11() {
   ID3D10Multithread* multithread = nullptr;
 
   const UINT creation_flags =
-      D3D11_CREATE_DEVICE_VIDEO_SUPPORT |
-      D3D11_CREATE_DEVICE_BGRA_SUPPORT |
+      D3D11_CREATE_DEVICE_VIDEO_SUPPORT | D3D11_CREATE_DEVICE_BGRA_SUPPORT |
       D3D11_CREATE_DEVICE_PREVENT_INTERNAL_THREADING_OPTIMIZATIONS;
 
   hr = D3D11CreateDevice(adapter_, D3D_DRIVER_TYPE_UNKNOWN, nullptr,
@@ -293,10 +292,9 @@ HRESULT MediaEnginePlayer::OpenURL(
 
   // Use custom byte stream for HTTP(S) URLs with headers.
   if (!http_headers.empty() && wcsncmp(url, L"http", 4) == 0) {
-    auto byte_stream =
-        new HttpByteStream(std::wstring(url), http_headers);
-    hr = engine_ex_->SetSourceFromByteStream(byte_stream,
-                                             const_cast<BSTR>(url));
+    auto byte_stream = new HttpByteStream(std::wstring(url), http_headers);
+    hr =
+        engine_ex_->SetSourceFromByteStream(byte_stream, const_cast<BSTR>(url));
     byte_stream->Release();
   } else {
     hr = engine_->SetSource(const_cast<BSTR>(url));
@@ -364,9 +362,7 @@ HRESULT MediaEnginePlayer::SetVolume(float volume) {
   return engine_->SetVolume(static_cast<double>(volume));
 }
 
-void MediaEnginePlayer::SetLooping(bool looping) {
-  is_looping_ = looping;
-}
+void MediaEnginePlayer::SetLooping(bool looping) { is_looping_ = looping; }
 
 void MediaEnginePlayer::SetTextureRegistrar(
     flutter::TextureRegistrar* texture_registrar, int64_t texture_id) {
@@ -388,9 +384,8 @@ void MediaEnginePlayer::SendEvent(MediaEnginePlayerEvent type) {
   SendEvent(type, empty);
 }
 
-void MediaEnginePlayer::SendEvent(
-    MediaEnginePlayerEvent type,
-    const flutter::EncodableMap& extra_data) {
+void MediaEnginePlayer::SendEvent(MediaEnginePlayerEvent type,
+                                  const flutter::EncodableMap& extra_data) {
   if (event_callback_) {
     event_callback_(type, extra_data);
   }
@@ -460,8 +455,8 @@ bool MediaEnginePlayer::UpdateFrame() {
   HRESULT hr = engine_->OnVideoStreamTick(&pts);
   if (hr != S_OK) return false;
 
-  hr = engine_->TransferVideoFrame(texture_, &frame_rect_src_,
-                                   &frame_rect_dst_, nullptr);
+  hr = engine_->TransferVideoFrame(texture_, &frame_rect_src_, &frame_rect_dst_,
+                                   nullptr);
   if (FAILED(hr)) return false;
 
   // Initialize the surface descriptor on first frame.

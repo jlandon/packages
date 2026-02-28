@@ -20,11 +20,7 @@ import 'windows_video_player_test.mocks.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  (
-    WindowsVideoPlayer,
-    MockWindowsVideoPlayerApi,
-    MockVideoPlayerInstanceApi,
-  )
+  (WindowsVideoPlayer, MockWindowsVideoPlayerApi, MockVideoPlayerInstanceApi)
   setUpMockPlayer({required int playerId}) {
     final pluginApi = MockWindowsVideoPlayerApi();
     final instanceApi = MockVideoPlayerInstanceApi();
@@ -43,39 +39,24 @@ void main() {
 
   group('WindowsVideoPlayer', () {
     test('init', () async {
-      final (
-        WindowsVideoPlayer player,
-        MockWindowsVideoPlayerApi api,
-        _,
-      ) = setUpMockPlayer(
-        playerId: 1,
-      );
+      final (WindowsVideoPlayer player, MockWindowsVideoPlayerApi api, _) =
+          setUpMockPlayer(playerId: 1);
       await player.init();
 
       verify(api.initialize());
     });
 
     test('dispose', () async {
-      final (
-        WindowsVideoPlayer player,
-        MockWindowsVideoPlayerApi api,
-        _,
-      ) = setUpMockPlayer(
-        playerId: 1,
-      );
+      final (WindowsVideoPlayer player, MockWindowsVideoPlayerApi api, _) =
+          setUpMockPlayer(playerId: 1);
       await player.dispose(1);
 
       verify(api.dispose(1));
     });
 
     test('create with asset', () async {
-      final (
-        WindowsVideoPlayer player,
-        MockWindowsVideoPlayerApi api,
-        _,
-      ) = setUpMockPlayer(
-        playerId: 1,
-      );
+      final (WindowsVideoPlayer player, MockWindowsVideoPlayerApi api, _) =
+          setUpMockPlayer(playerId: 1);
       const newPlayerId = 2;
       when(api.create(any)).thenAnswer((_) async => newPlayerId);
 
@@ -92,9 +73,7 @@ void main() {
         ),
       );
 
-      final VerificationResult verification = verify(
-        api.create(captureAny),
-      );
+      final VerificationResult verification = verify(api.create(captureAny));
       final creationOptions = verification.captured[0] as CreationOptions;
       expect(creationOptions.uri, assetUrl);
       expect(playerId, newPlayerId);
@@ -105,27 +84,17 @@ void main() {
     });
 
     test('create with network', () async {
-      final (
-        WindowsVideoPlayer player,
-        MockWindowsVideoPlayerApi api,
-        _,
-      ) = setUpMockPlayer(
-        playerId: 1,
-      );
+      final (WindowsVideoPlayer player, MockWindowsVideoPlayerApi api, _) =
+          setUpMockPlayer(playerId: 1);
       const newPlayerId = 2;
       when(api.create(any)).thenAnswer((_) async => newPlayerId);
 
       const uri = 'https://example.com/video.mp4';
       final int? playerId = await player.create(
-        DataSource(
-          sourceType: DataSourceType.network,
-          uri: uri,
-        ),
+        DataSource(sourceType: DataSourceType.network, uri: uri),
       );
 
-      final VerificationResult verification = verify(
-        api.create(captureAny),
-      );
+      final VerificationResult verification = verify(api.create(captureAny));
       final creationOptions = verification.captured[0] as CreationOptions;
       expect(creationOptions.uri, uri);
       expect(creationOptions.httpHeaders, <String, String>{});
@@ -137,13 +106,8 @@ void main() {
     });
 
     test('create with network passes headers', () async {
-      final (
-        WindowsVideoPlayer player,
-        MockWindowsVideoPlayerApi api,
-        _,
-      ) = setUpMockPlayer(
-        playerId: 1,
-      );
+      final (WindowsVideoPlayer player, MockWindowsVideoPlayerApi api, _) =
+          setUpMockPlayer(playerId: 1);
       when(api.create(any)).thenAnswer((_) async => 2);
 
       const headers = <String, String>{'Authorization': 'Bearer token'};
@@ -155,21 +119,14 @@ void main() {
         ),
       );
 
-      final VerificationResult verification = verify(
-        api.create(captureAny),
-      );
+      final VerificationResult verification = verify(api.create(captureAny));
       final creationOptions = verification.captured[0] as CreationOptions;
       expect(creationOptions.httpHeaders, headers);
     });
 
     test('create with file', () async {
-      final (
-        WindowsVideoPlayer player,
-        MockWindowsVideoPlayerApi api,
-        _,
-      ) = setUpMockPlayer(
-        playerId: 1,
-      );
+      final (WindowsVideoPlayer player, MockWindowsVideoPlayerApi api, _) =
+          setUpMockPlayer(playerId: 1);
       const newPlayerId = 2;
       when(api.create(any)).thenAnswer((_) async => newPlayerId);
 
@@ -178,9 +135,7 @@ void main() {
         DataSource(sourceType: DataSourceType.file, uri: fileUri),
       );
 
-      final VerificationResult verification = verify(
-        api.create(captureAny),
-      );
+      final VerificationResult verification = verify(api.create(captureAny));
       final creationOptions = verification.captured[0] as CreationOptions;
       expect(creationOptions.uri, fileUri);
       expect(playerId, newPlayerId);
@@ -191,13 +146,8 @@ void main() {
     });
 
     test('createWithOptions with asset', () async {
-      final (
-        WindowsVideoPlayer player,
-        MockWindowsVideoPlayerApi api,
-        _,
-      ) = setUpMockPlayer(
-        playerId: 1,
-      );
+      final (WindowsVideoPlayer player, MockWindowsVideoPlayerApi api, _) =
+          setUpMockPlayer(playerId: 1);
       const newPlayerId = 2;
       when(api.create(any)).thenAnswer((_) async => newPlayerId);
 
@@ -217,69 +167,47 @@ void main() {
         ),
       );
 
-      final VerificationResult verification = verify(
-        api.create(captureAny),
-      );
+      final VerificationResult verification = verify(api.create(captureAny));
       final creationOptions = verification.captured[0] as CreationOptions;
       expect(creationOptions.uri, assetUrl);
       expect(playerId, newPlayerId);
     });
 
     test('createWithOptions with network', () async {
-      final (
-        WindowsVideoPlayer player,
-        MockWindowsVideoPlayerApi api,
-        _,
-      ) = setUpMockPlayer(
-        playerId: 1,
-      );
+      final (WindowsVideoPlayer player, MockWindowsVideoPlayerApi api, _) =
+          setUpMockPlayer(playerId: 1);
       const newPlayerId = 2;
       when(api.create(any)).thenAnswer((_) async => newPlayerId);
 
       const uri = 'https://example.com/video.mp4';
       final int? playerId = await player.createWithOptions(
         VideoCreationOptions(
-          dataSource: DataSource(
-            sourceType: DataSourceType.network,
-            uri: uri,
-          ),
+          dataSource: DataSource(sourceType: DataSourceType.network, uri: uri),
           viewType: VideoViewType.textureView,
         ),
       );
 
-      final VerificationResult verification = verify(
-        api.create(captureAny),
-      );
+      final VerificationResult verification = verify(api.create(captureAny));
       final creationOptions = verification.captured[0] as CreationOptions;
       expect(creationOptions.uri, uri);
       expect(playerId, newPlayerId);
     });
 
     test('createWithOptions with file', () async {
-      final (
-        WindowsVideoPlayer player,
-        MockWindowsVideoPlayerApi api,
-        _,
-      ) = setUpMockPlayer(
-        playerId: 1,
-      );
+      final (WindowsVideoPlayer player, MockWindowsVideoPlayerApi api, _) =
+          setUpMockPlayer(playerId: 1);
       const newPlayerId = 2;
       when(api.create(any)).thenAnswer((_) async => newPlayerId);
 
       const fileUri = 'file:///C:/videos/test.mp4';
       final int? playerId = await player.createWithOptions(
         VideoCreationOptions(
-          dataSource: DataSource(
-            sourceType: DataSourceType.file,
-            uri: fileUri,
-          ),
+          dataSource: DataSource(sourceType: DataSourceType.file, uri: fileUri),
           viewType: VideoViewType.textureView,
         ),
       );
 
-      final VerificationResult verification = verify(
-        api.create(captureAny),
-      );
+      final VerificationResult verification = verify(api.create(captureAny));
       final creationOptions = verification.captured[0] as CreationOptions;
       expect(creationOptions.uri, fileUri);
       expect(playerId, newPlayerId);
@@ -326,26 +254,16 @@ void main() {
 
     group('setMixWithOthers', () {
       test('passes true', () async {
-        final (
-          WindowsVideoPlayer player,
-          MockWindowsVideoPlayerApi api,
-          _,
-        ) = setUpMockPlayer(
-          playerId: 1,
-        );
+        final (WindowsVideoPlayer player, MockWindowsVideoPlayerApi api, _) =
+            setUpMockPlayer(playerId: 1);
         await player.setMixWithOthers(true);
 
         verify(api.setMixWithOthers(true));
       });
 
       test('passes false', () async {
-        final (
-          WindowsVideoPlayer player,
-          MockWindowsVideoPlayerApi api,
-          _,
-        ) = setUpMockPlayer(
-          playerId: 1,
-        );
+        final (WindowsVideoPlayer player, MockWindowsVideoPlayerApi api, _) =
+            setUpMockPlayer(playerId: 1);
         await player.setMixWithOthers(false);
 
         verify(api.setMixWithOthers(false));
@@ -415,9 +333,7 @@ void main() {
     });
 
     test('buildViewWithOptions returns Texture', () async {
-      final (WindowsVideoPlayer player, _, _) = setUpMockPlayer(
-        playerId: 1,
-      );
+      final (WindowsVideoPlayer player, _, _) = setUpMockPlayer(playerId: 1);
       final Widget widget = player.buildViewWithOptions(
         const VideoViewOptions(playerId: 1),
       );
@@ -432,102 +348,109 @@ void main() {
       const mockChannel = 'flutter.dev/videoPlayer/videoEvents$playerId';
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMessageHandler(mockChannel, (ByteData? message) async {
-        final MethodCall methodCall =
-            const StandardMethodCodec().decodeMethodCall(message);
-        if (methodCall.method == 'listen') {
-          await TestDefaultBinaryMessengerBinding
-              .instance.defaultBinaryMessenger
-              .handlePlatformMessage(
-            mockChannel,
-            const StandardMethodCodec()
-                .encodeSuccessEnvelope(<String, dynamic>{
-              'event': 'initialized',
-              'duration': 98765,
-              'width': 1920,
-              'height': 1080,
-            }),
-            (ByteData? data) {},
-          );
+            final MethodCall methodCall = const StandardMethodCodec()
+                .decodeMethodCall(message);
+            if (methodCall.method == 'listen') {
+              await TestDefaultBinaryMessengerBinding
+                  .instance
+                  .defaultBinaryMessenger
+                  .handlePlatformMessage(
+                    mockChannel,
+                    const StandardMethodCodec()
+                        .encodeSuccessEnvelope(<String, dynamic>{
+                          'event': 'initialized',
+                          'duration': 98765,
+                          'width': 1920,
+                          'height': 1080,
+                        }),
+                    (ByteData? data) {},
+                  );
 
-          await TestDefaultBinaryMessengerBinding
-              .instance.defaultBinaryMessenger
-              .handlePlatformMessage(
-            mockChannel,
-            const StandardMethodCodec()
-                .encodeSuccessEnvelope(<String, dynamic>{
-              'event': 'completed',
-            }),
-            (ByteData? data) {},
-          );
+              await TestDefaultBinaryMessengerBinding
+                  .instance
+                  .defaultBinaryMessenger
+                  .handlePlatformMessage(
+                    mockChannel,
+                    const StandardMethodCodec().encodeSuccessEnvelope(
+                      <String, dynamic>{'event': 'completed'},
+                    ),
+                    (ByteData? data) {},
+                  );
 
-          await TestDefaultBinaryMessengerBinding
-              .instance.defaultBinaryMessenger
-              .handlePlatformMessage(
-            mockChannel,
-            const StandardMethodCodec()
-                .encodeSuccessEnvelope(<String, dynamic>{
-              'event': 'bufferingUpdate',
-              'values': <List<dynamic>>[
-                <int>[0, 1234],
-                <int>[1235, 4000],
-              ],
-            }),
-            (ByteData? data) {},
-          );
+              await TestDefaultBinaryMessengerBinding
+                  .instance
+                  .defaultBinaryMessenger
+                  .handlePlatformMessage(
+                    mockChannel,
+                    const StandardMethodCodec().encodeSuccessEnvelope(
+                      <String, dynamic>{
+                        'event': 'bufferingUpdate',
+                        'values': <List<dynamic>>[
+                          <int>[0, 1234],
+                          <int>[1235, 4000],
+                        ],
+                      },
+                    ),
+                    (ByteData? data) {},
+                  );
 
-          await TestDefaultBinaryMessengerBinding
-              .instance.defaultBinaryMessenger
-              .handlePlatformMessage(
-            mockChannel,
-            const StandardMethodCodec()
-                .encodeSuccessEnvelope(<String, dynamic>{
-              'event': 'bufferingStart',
-            }),
-            (ByteData? data) {},
-          );
+              await TestDefaultBinaryMessengerBinding
+                  .instance
+                  .defaultBinaryMessenger
+                  .handlePlatformMessage(
+                    mockChannel,
+                    const StandardMethodCodec().encodeSuccessEnvelope(
+                      <String, dynamic>{'event': 'bufferingStart'},
+                    ),
+                    (ByteData? data) {},
+                  );
 
-          await TestDefaultBinaryMessengerBinding
-              .instance.defaultBinaryMessenger
-              .handlePlatformMessage(
-            mockChannel,
-            const StandardMethodCodec()
-                .encodeSuccessEnvelope(<String, dynamic>{
-              'event': 'bufferingEnd',
-            }),
-            (ByteData? data) {},
-          );
+              await TestDefaultBinaryMessengerBinding
+                  .instance
+                  .defaultBinaryMessenger
+                  .handlePlatformMessage(
+                    mockChannel,
+                    const StandardMethodCodec().encodeSuccessEnvelope(
+                      <String, dynamic>{'event': 'bufferingEnd'},
+                    ),
+                    (ByteData? data) {},
+                  );
 
-          await TestDefaultBinaryMessengerBinding
-              .instance.defaultBinaryMessenger
-              .handlePlatformMessage(
-            mockChannel,
-            const StandardMethodCodec()
-                .encodeSuccessEnvelope(<String, dynamic>{
-              'event': 'isPlayingStateUpdate',
-              'isPlaying': true,
-            }),
-            (ByteData? data) {},
-          );
+              await TestDefaultBinaryMessengerBinding
+                  .instance
+                  .defaultBinaryMessenger
+                  .handlePlatformMessage(
+                    mockChannel,
+                    const StandardMethodCodec().encodeSuccessEnvelope(
+                      <String, dynamic>{
+                        'event': 'isPlayingStateUpdate',
+                        'isPlaying': true,
+                      },
+                    ),
+                    (ByteData? data) {},
+                  );
 
-          await TestDefaultBinaryMessengerBinding
-              .instance.defaultBinaryMessenger
-              .handlePlatformMessage(
-            mockChannel,
-            const StandardMethodCodec()
-                .encodeSuccessEnvelope(<String, dynamic>{
-              'event': 'isPlayingStateUpdate',
-              'isPlaying': false,
-            }),
-            (ByteData? data) {},
-          );
+              await TestDefaultBinaryMessengerBinding
+                  .instance
+                  .defaultBinaryMessenger
+                  .handlePlatformMessage(
+                    mockChannel,
+                    const StandardMethodCodec().encodeSuccessEnvelope(
+                      <String, dynamic>{
+                        'event': 'isPlayingStateUpdate',
+                        'isPlaying': false,
+                      },
+                    ),
+                    (ByteData? data) {},
+                  );
 
-          return const StandardMethodCodec().encodeSuccessEnvelope(null);
-        } else if (methodCall.method == 'cancel') {
-          return const StandardMethodCodec().encodeSuccessEnvelope(null);
-        } else {
-          fail('Expected listen or cancel');
-        }
-      });
+              return const StandardMethodCodec().encodeSuccessEnvelope(null);
+            } else if (methodCall.method == 'cancel') {
+              return const StandardMethodCodec().encodeSuccessEnvelope(null);
+            } else {
+              fail('Expected listen or cancel');
+            }
+          });
       expect(
         player.videoEventsFor(playerId),
         emitsInOrder(<dynamic>[
@@ -540,8 +463,7 @@ void main() {
           VideoEvent(
             eventType: VideoEventType.bufferingUpdate,
             buffered: <DurationRange>[
-              DurationRange(
-                  Duration.zero, const Duration(milliseconds: 1234)),
+              DurationRange(Duration.zero, const Duration(milliseconds: 1234)),
               DurationRange(
                 const Duration(milliseconds: 1235),
                 const Duration(milliseconds: 1235 + 4000),

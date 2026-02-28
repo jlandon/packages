@@ -30,10 +30,7 @@ class _App extends StatelessWidget {
           ),
         ),
         body: TabBarView(
-          children: <Widget>[
-            _BumbleBeeRemoteVideo(),
-            _ButterFlyAssetVideo(),
-          ],
+          children: <Widget>[_BumbleBeeRemoteVideo(), _ButterFlyAssetVideo()],
         ),
       ),
     );
@@ -206,10 +203,7 @@ class _ControlsOverlay extends StatelessWidget {
               ];
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 12,
-                horizontal: 16,
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               child: Text('${controller.value.playbackSpeed}x'),
             ),
           ),

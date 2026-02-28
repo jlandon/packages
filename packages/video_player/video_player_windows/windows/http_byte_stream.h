@@ -19,8 +19,7 @@ namespace video_player_windows {
 class HttpConnection {
  public:
   // Opens an HTTP connection to the given URL with optional headers.
-  bool Open(const std::wstring& url,
-            const std::vector<std::wstring>& headers,
+  bool Open(const std::wstring& url, const std::vector<std::wstring>& headers,
             QWORD start_position = 0);
   // Reads data from the connection.
   int Read(BYTE* buffer, int size);
@@ -40,8 +39,7 @@ class HttpConnection {
 // An IMFByteStream implementation that reads from an HTTP(S) URL using
 // WinHTTP. This allows the Media Foundation engine to play network videos
 // with custom HTTP headers.
-class HttpByteStream : public IMFByteStream,
-                       public IMFByteStreamBuffering {
+class HttpByteStream : public IMFByteStream, public IMFByteStreamBuffering {
  public:
   HttpByteStream(const std::wstring& url,
                  const std::vector<std::wstring>& headers);
@@ -60,20 +58,16 @@ class HttpByteStream : public IMFByteStream,
   STDMETHODIMP SetCurrentPosition(QWORD position) override;
   STDMETHODIMP IsEndOfStream(BOOL* end_of_stream) override;
   STDMETHODIMP Read(BYTE* buffer, ULONG cb, ULONG* bytes_read) override;
-  STDMETHODIMP BeginRead(BYTE* buffer, ULONG cb,
-                         IMFAsyncCallback* callback,
+  STDMETHODIMP BeginRead(BYTE* buffer, ULONG cb, IMFAsyncCallback* callback,
                          IUnknown* state) override;
   STDMETHODIMP EndRead(IMFAsyncResult* result, ULONG* bytes_read) override;
   STDMETHODIMP Write(const BYTE* buffer, ULONG cb,
                      ULONG* bytes_written) override;
   STDMETHODIMP BeginWrite(const BYTE* buffer, ULONG cb,
-                          IMFAsyncCallback* callback,
-                          IUnknown* state) override;
-  STDMETHODIMP EndWrite(IMFAsyncResult* result,
-                        ULONG* bytes_written) override;
-  STDMETHODIMP Seek(MFBYTESTREAM_SEEK_ORIGIN origin,
-                    LONGLONG offset, DWORD flags,
-                    QWORD* current_position) override;
+                          IMFAsyncCallback* callback, IUnknown* state) override;
+  STDMETHODIMP EndWrite(IMFAsyncResult* result, ULONG* bytes_written) override;
+  STDMETHODIMP Seek(MFBYTESTREAM_SEEK_ORIGIN origin, LONGLONG offset,
+                    DWORD flags, QWORD* current_position) override;
   STDMETHODIMP Flush() override;
   STDMETHODIMP Close() override;
 

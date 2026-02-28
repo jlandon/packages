@@ -33,20 +33,13 @@ FlutterError CreateConnectionError(const std::string channel_name) {
 
 // CreationOptions
 
-CreationOptions::CreationOptions(
-  const std::string& uri,
-  const EncodableMap& http_headers)
- : uri_(uri),
-    http_headers_(http_headers) {}
+CreationOptions::CreationOptions(const std::string& uri,
+                                 const EncodableMap& http_headers)
+    : uri_(uri), http_headers_(http_headers) {}
 
-const std::string& CreationOptions::uri() const {
-  return uri_;
-}
+const std::string& CreationOptions::uri() const { return uri_; }
 
-void CreationOptions::set_uri(std::string_view value_arg) {
-  uri_ = value_arg;
-}
-
+void CreationOptions::set_uri(std::string_view value_arg) { uri_ = value_arg; }
 
 const EncodableMap& CreationOptions::http_headers() const {
   return http_headers_;
@@ -55,7 +48,6 @@ const EncodableMap& CreationOptions::http_headers() const {
 void CreationOptions::set_http_headers(const EncodableMap& value_arg) {
   http_headers_ = value_arg;
 }
-
 
 EncodableList CreationOptions::ToEncodableList() const {
   EncodableList list;
@@ -66,34 +58,35 @@ EncodableList CreationOptions::ToEncodableList() const {
 }
 
 CreationOptions CreationOptions::FromEncodableList(const EncodableList& list) {
-  CreationOptions decoded(
-    std::get<std::string>(list[0]),
-    std::get<EncodableMap>(list[1]));
+  CreationOptions decoded(std::get<std::string>(list[0]),
+                          std::get<EncodableMap>(list[1]));
   return decoded;
 }
-
 
 PigeonInternalCodecSerializer::PigeonInternalCodecSerializer() {}
 
 EncodableValue PigeonInternalCodecSerializer::ReadValueOfType(
-  uint8_t type,
-  flutter::ByteStreamReader* stream) const {
+    uint8_t type, flutter::ByteStreamReader* stream) const {
   switch (type) {
     case 129: {
-        return CustomEncodableValue(CreationOptions::FromEncodableList(std::get<EncodableList>(ReadValue(stream))));
-      }
+      return CustomEncodableValue(CreationOptions::FromEncodableList(
+          std::get<EncodableList>(ReadValue(stream))));
+    }
     default:
       return flutter::StandardCodecSerializer::ReadValueOfType(type, stream);
-    }
+  }
 }
 
 void PigeonInternalCodecSerializer::WriteValue(
-  const EncodableValue& value,
-  flutter::ByteStreamWriter* stream) const {
-  if (const CustomEncodableValue* custom_value = std::get_if<CustomEncodableValue>(&value)) {
+    const EncodableValue& value, flutter::ByteStreamWriter* stream) const {
+  if (const CustomEncodableValue* custom_value =
+          std::get_if<CustomEncodableValue>(&value)) {
     if (custom_value->type() == typeid(CreationOptions)) {
       stream->WriteByte(129);
-      WriteValue(EncodableValue(std::any_cast<CreationOptions>(*custom_value).ToEncodableList()), stream);
+      WriteValue(
+          EncodableValue(
+              std::any_cast<CreationOptions>(*custom_value).ToEncodableList()),
+          stream);
       return;
     }
   }
@@ -102,404 +95,490 @@ void PigeonInternalCodecSerializer::WriteValue(
 
 /// The codec used by WindowsVideoPlayerApi.
 const flutter::StandardMessageCodec& WindowsVideoPlayerApi::GetCodec() {
-  return flutter::StandardMessageCodec::GetInstance(&PigeonInternalCodecSerializer::GetInstance());
+  return flutter::StandardMessageCodec::GetInstance(
+      &PigeonInternalCodecSerializer::GetInstance());
 }
 
-// Sets up an instance of `WindowsVideoPlayerApi` to handle messages through the `binary_messenger`.
-void WindowsVideoPlayerApi::SetUp(
-  flutter::BinaryMessenger* binary_messenger,
-  WindowsVideoPlayerApi* api) {
+// Sets up an instance of `WindowsVideoPlayerApi` to handle messages through the
+// `binary_messenger`.
+void WindowsVideoPlayerApi::SetUp(flutter::BinaryMessenger* binary_messenger,
+                                  WindowsVideoPlayerApi* api) {
   WindowsVideoPlayerApi::SetUp(binary_messenger, api, "");
 }
 
-void WindowsVideoPlayerApi::SetUp(
-  flutter::BinaryMessenger* binary_messenger,
-  WindowsVideoPlayerApi* api,
-  const std::string& message_channel_suffix) {
-  const std::string prepended_suffix = message_channel_suffix.length() > 0 ? std::string(".") + message_channel_suffix : "";
+void WindowsVideoPlayerApi::SetUp(flutter::BinaryMessenger* binary_messenger,
+                                  WindowsVideoPlayerApi* api,
+                                  const std::string& message_channel_suffix) {
+  const std::string prepended_suffix =
+      message_channel_suffix.length() > 0
+          ? std::string(".") + message_channel_suffix
+          : "";
   {
-    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.video_player_windows.WindowsVideoPlayerApi.initialize" + prepended_suffix, &GetCodec());
+    BasicMessageChannel<> channel(binary_messenger,
+                                  "dev.flutter.pigeon.video_player_windows."
+                                  "WindowsVideoPlayerApi.initialize" +
+                                      prepended_suffix,
+                                  &GetCodec());
     if (api != nullptr) {
-      channel.SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
-        try {
-          std::optional<FlutterError> output = api->Initialize();
-          if (output.has_value()) {
-            reply(WrapError(output.value()));
-            return;
-          }
-          EncodableList wrapped;
-          wrapped.push_back(EncodableValue());
-          reply(EncodableValue(std::move(wrapped)));
-        } catch (const std::exception& exception) {
-          reply(WrapError(exception.what()));
-        }
-      });
-    } else {
-      channel.SetMessageHandler(nullptr);
-    }
-  }
-  {
-    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.video_player_windows.WindowsVideoPlayerApi.create" + prepended_suffix, &GetCodec());
-    if (api != nullptr) {
-      channel.SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
-        try {
-          const auto& args = std::get<EncodableList>(message);
-          const auto& encodable_options_arg = args.at(0);
-          if (encodable_options_arg.IsNull()) {
-            reply(WrapError("options_arg unexpectedly null."));
-            return;
-          }
-          const auto& options_arg = std::any_cast<const CreationOptions&>(std::get<CustomEncodableValue>(encodable_options_arg));
-          api->Create(options_arg, [reply](ErrorOr<int64_t>&& output) {
-            if (output.has_error()) {
-              reply(WrapError(output.error()));
-              return;
+      channel.SetMessageHandler(
+          [api](const EncodableValue& message,
+                const flutter::MessageReply<EncodableValue>& reply) {
+            try {
+              std::optional<FlutterError> output = api->Initialize();
+              if (output.has_value()) {
+                reply(WrapError(output.value()));
+                return;
+              }
+              EncodableList wrapped;
+              wrapped.push_back(EncodableValue());
+              reply(EncodableValue(std::move(wrapped)));
+            } catch (const std::exception& exception) {
+              reply(WrapError(exception.what()));
             }
-            EncodableList wrapped;
-            wrapped.push_back(EncodableValue(std::move(output).TakeValue()));
-            reply(EncodableValue(std::move(wrapped)));
           });
-        } catch (const std::exception& exception) {
-          reply(WrapError(exception.what()));
-        }
-      });
     } else {
       channel.SetMessageHandler(nullptr);
     }
   }
   {
-    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.video_player_windows.WindowsVideoPlayerApi.dispose" + prepended_suffix, &GetCodec());
+    BasicMessageChannel<> channel(
+        binary_messenger,
+        "dev.flutter.pigeon.video_player_windows.WindowsVideoPlayerApi.create" +
+            prepended_suffix,
+        &GetCodec());
     if (api != nullptr) {
-      channel.SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
-        try {
-          const auto& args = std::get<EncodableList>(message);
-          const auto& encodable_player_id_arg = args.at(0);
-          if (encodable_player_id_arg.IsNull()) {
-            reply(WrapError("player_id_arg unexpectedly null."));
-            return;
-          }
-          const int64_t player_id_arg = encodable_player_id_arg.LongValue();
-          std::optional<FlutterError> output = api->Dispose(player_id_arg);
-          if (output.has_value()) {
-            reply(WrapError(output.value()));
-            return;
-          }
-          EncodableList wrapped;
-          wrapped.push_back(EncodableValue());
-          reply(EncodableValue(std::move(wrapped)));
-        } catch (const std::exception& exception) {
-          reply(WrapError(exception.what()));
-        }
-      });
+      channel.SetMessageHandler(
+          [api](const EncodableValue& message,
+                const flutter::MessageReply<EncodableValue>& reply) {
+            try {
+              const auto& args = std::get<EncodableList>(message);
+              const auto& encodable_options_arg = args.at(0);
+              if (encodable_options_arg.IsNull()) {
+                reply(WrapError("options_arg unexpectedly null."));
+                return;
+              }
+              const auto& options_arg = std::any_cast<const CreationOptions&>(
+                  std::get<CustomEncodableValue>(encodable_options_arg));
+              api->Create(options_arg, [reply](ErrorOr<int64_t>&& output) {
+                if (output.has_error()) {
+                  reply(WrapError(output.error()));
+                  return;
+                }
+                EncodableList wrapped;
+                wrapped.push_back(
+                    EncodableValue(std::move(output).TakeValue()));
+                reply(EncodableValue(std::move(wrapped)));
+              });
+            } catch (const std::exception& exception) {
+              reply(WrapError(exception.what()));
+            }
+          });
     } else {
       channel.SetMessageHandler(nullptr);
     }
   }
   {
-    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.video_player_windows.WindowsVideoPlayerApi.setMixWithOthers" + prepended_suffix, &GetCodec());
+    BasicMessageChannel<> channel(binary_messenger,
+                                  "dev.flutter.pigeon.video_player_windows."
+                                  "WindowsVideoPlayerApi.dispose" +
+                                      prepended_suffix,
+                                  &GetCodec());
     if (api != nullptr) {
-      channel.SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
-        try {
-          const auto& args = std::get<EncodableList>(message);
-          const auto& encodable_mix_with_others_arg = args.at(0);
-          if (encodable_mix_with_others_arg.IsNull()) {
-            reply(WrapError("mix_with_others_arg unexpectedly null."));
-            return;
-          }
-          const auto& mix_with_others_arg = std::get<bool>(encodable_mix_with_others_arg);
-          std::optional<FlutterError> output = api->SetMixWithOthers(mix_with_others_arg);
-          if (output.has_value()) {
-            reply(WrapError(output.value()));
-            return;
-          }
-          EncodableList wrapped;
-          wrapped.push_back(EncodableValue());
-          reply(EncodableValue(std::move(wrapped)));
-        } catch (const std::exception& exception) {
-          reply(WrapError(exception.what()));
-        }
-      });
+      channel.SetMessageHandler(
+          [api](const EncodableValue& message,
+                const flutter::MessageReply<EncodableValue>& reply) {
+            try {
+              const auto& args = std::get<EncodableList>(message);
+              const auto& encodable_player_id_arg = args.at(0);
+              if (encodable_player_id_arg.IsNull()) {
+                reply(WrapError("player_id_arg unexpectedly null."));
+                return;
+              }
+              const int64_t player_id_arg = encodable_player_id_arg.LongValue();
+              std::optional<FlutterError> output = api->Dispose(player_id_arg);
+              if (output.has_value()) {
+                reply(WrapError(output.value()));
+                return;
+              }
+              EncodableList wrapped;
+              wrapped.push_back(EncodableValue());
+              reply(EncodableValue(std::move(wrapped)));
+            } catch (const std::exception& exception) {
+              reply(WrapError(exception.what()));
+            }
+          });
     } else {
       channel.SetMessageHandler(nullptr);
     }
   }
   {
-    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.video_player_windows.WindowsVideoPlayerApi.getAssetUrl" + prepended_suffix, &GetCodec());
+    BasicMessageChannel<> channel(binary_messenger,
+                                  "dev.flutter.pigeon.video_player_windows."
+                                  "WindowsVideoPlayerApi.setMixWithOthers" +
+                                      prepended_suffix,
+                                  &GetCodec());
     if (api != nullptr) {
-      channel.SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
-        try {
-          const auto& args = std::get<EncodableList>(message);
-          const auto& encodable_asset_arg = args.at(0);
-          if (encodable_asset_arg.IsNull()) {
-            reply(WrapError("asset_arg unexpectedly null."));
-            return;
-          }
-          const auto& asset_arg = std::get<std::string>(encodable_asset_arg);
-          const auto& encodable_package_name_arg = args.at(1);
-          const auto* package_name_arg = std::get_if<std::string>(&encodable_package_name_arg);
-          ErrorOr<std::string> output = api->GetAssetUrl(asset_arg, package_name_arg);
-          if (output.has_error()) {
-            reply(WrapError(output.error()));
-            return;
-          }
-          EncodableList wrapped;
-          wrapped.push_back(EncodableValue(std::move(output).TakeValue()));
-          reply(EncodableValue(std::move(wrapped)));
-        } catch (const std::exception& exception) {
-          reply(WrapError(exception.what()));
-        }
-      });
+      channel.SetMessageHandler(
+          [api](const EncodableValue& message,
+                const flutter::MessageReply<EncodableValue>& reply) {
+            try {
+              const auto& args = std::get<EncodableList>(message);
+              const auto& encodable_mix_with_others_arg = args.at(0);
+              if (encodable_mix_with_others_arg.IsNull()) {
+                reply(WrapError("mix_with_others_arg unexpectedly null."));
+                return;
+              }
+              const auto& mix_with_others_arg =
+                  std::get<bool>(encodable_mix_with_others_arg);
+              std::optional<FlutterError> output =
+                  api->SetMixWithOthers(mix_with_others_arg);
+              if (output.has_value()) {
+                reply(WrapError(output.value()));
+                return;
+              }
+              EncodableList wrapped;
+              wrapped.push_back(EncodableValue());
+              reply(EncodableValue(std::move(wrapped)));
+            } catch (const std::exception& exception) {
+              reply(WrapError(exception.what()));
+            }
+          });
+    } else {
+      channel.SetMessageHandler(nullptr);
+    }
+  }
+  {
+    BasicMessageChannel<> channel(binary_messenger,
+                                  "dev.flutter.pigeon.video_player_windows."
+                                  "WindowsVideoPlayerApi.getAssetUrl" +
+                                      prepended_suffix,
+                                  &GetCodec());
+    if (api != nullptr) {
+      channel.SetMessageHandler(
+          [api](const EncodableValue& message,
+                const flutter::MessageReply<EncodableValue>& reply) {
+            try {
+              const auto& args = std::get<EncodableList>(message);
+              const auto& encodable_asset_arg = args.at(0);
+              if (encodable_asset_arg.IsNull()) {
+                reply(WrapError("asset_arg unexpectedly null."));
+                return;
+              }
+              const auto& asset_arg =
+                  std::get<std::string>(encodable_asset_arg);
+              const auto& encodable_package_name_arg = args.at(1);
+              const auto* package_name_arg =
+                  std::get_if<std::string>(&encodable_package_name_arg);
+              ErrorOr<std::string> output =
+                  api->GetAssetUrl(asset_arg, package_name_arg);
+              if (output.has_error()) {
+                reply(WrapError(output.error()));
+                return;
+              }
+              EncodableList wrapped;
+              wrapped.push_back(EncodableValue(std::move(output).TakeValue()));
+              reply(EncodableValue(std::move(wrapped)));
+            } catch (const std::exception& exception) {
+              reply(WrapError(exception.what()));
+            }
+          });
     } else {
       channel.SetMessageHandler(nullptr);
     }
   }
 }
 
-EncodableValue WindowsVideoPlayerApi::WrapError(std::string_view error_message) {
-  return EncodableValue(EncodableList{
-    EncodableValue(std::string(error_message)),
-    EncodableValue("Error"),
-    EncodableValue()
-  });
+EncodableValue WindowsVideoPlayerApi::WrapError(
+    std::string_view error_message) {
+  return EncodableValue(
+      EncodableList{EncodableValue(std::string(error_message)),
+                    EncodableValue("Error"), EncodableValue()});
 }
 
 EncodableValue WindowsVideoPlayerApi::WrapError(const FlutterError& error) {
-  return EncodableValue(EncodableList{
-    EncodableValue(error.code()),
-    EncodableValue(error.message()),
-    error.details()
-  });
+  return EncodableValue(EncodableList{EncodableValue(error.code()),
+                                      EncodableValue(error.message()),
+                                      error.details()});
 }
 
 /// The codec used by VideoPlayerInstanceApi.
 const flutter::StandardMessageCodec& VideoPlayerInstanceApi::GetCodec() {
-  return flutter::StandardMessageCodec::GetInstance(&PigeonInternalCodecSerializer::GetInstance());
+  return flutter::StandardMessageCodec::GetInstance(
+      &PigeonInternalCodecSerializer::GetInstance());
 }
 
-// Sets up an instance of `VideoPlayerInstanceApi` to handle messages through the `binary_messenger`.
-void VideoPlayerInstanceApi::SetUp(
-  flutter::BinaryMessenger* binary_messenger,
-  VideoPlayerInstanceApi* api) {
+// Sets up an instance of `VideoPlayerInstanceApi` to handle messages through
+// the `binary_messenger`.
+void VideoPlayerInstanceApi::SetUp(flutter::BinaryMessenger* binary_messenger,
+                                   VideoPlayerInstanceApi* api) {
   VideoPlayerInstanceApi::SetUp(binary_messenger, api, "");
 }
 
-void VideoPlayerInstanceApi::SetUp(
-  flutter::BinaryMessenger* binary_messenger,
-  VideoPlayerInstanceApi* api,
-  const std::string& message_channel_suffix) {
-  const std::string prepended_suffix = message_channel_suffix.length() > 0 ? std::string(".") + message_channel_suffix : "";
+void VideoPlayerInstanceApi::SetUp(flutter::BinaryMessenger* binary_messenger,
+                                   VideoPlayerInstanceApi* api,
+                                   const std::string& message_channel_suffix) {
+  const std::string prepended_suffix =
+      message_channel_suffix.length() > 0
+          ? std::string(".") + message_channel_suffix
+          : "";
   {
-    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.video_player_windows.VideoPlayerInstanceApi.setLooping" + prepended_suffix, &GetCodec());
+    BasicMessageChannel<> channel(binary_messenger,
+                                  "dev.flutter.pigeon.video_player_windows."
+                                  "VideoPlayerInstanceApi.setLooping" +
+                                      prepended_suffix,
+                                  &GetCodec());
     if (api != nullptr) {
-      channel.SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
-        try {
-          const auto& args = std::get<EncodableList>(message);
-          const auto& encodable_looping_arg = args.at(0);
-          if (encodable_looping_arg.IsNull()) {
-            reply(WrapError("looping_arg unexpectedly null."));
-            return;
-          }
-          const auto& looping_arg = std::get<bool>(encodable_looping_arg);
-          std::optional<FlutterError> output = api->SetLooping(looping_arg);
-          if (output.has_value()) {
-            reply(WrapError(output.value()));
-            return;
-          }
-          EncodableList wrapped;
-          wrapped.push_back(EncodableValue());
-          reply(EncodableValue(std::move(wrapped)));
-        } catch (const std::exception& exception) {
-          reply(WrapError(exception.what()));
-        }
-      });
+      channel.SetMessageHandler(
+          [api](const EncodableValue& message,
+                const flutter::MessageReply<EncodableValue>& reply) {
+            try {
+              const auto& args = std::get<EncodableList>(message);
+              const auto& encodable_looping_arg = args.at(0);
+              if (encodable_looping_arg.IsNull()) {
+                reply(WrapError("looping_arg unexpectedly null."));
+                return;
+              }
+              const auto& looping_arg = std::get<bool>(encodable_looping_arg);
+              std::optional<FlutterError> output = api->SetLooping(looping_arg);
+              if (output.has_value()) {
+                reply(WrapError(output.value()));
+                return;
+              }
+              EncodableList wrapped;
+              wrapped.push_back(EncodableValue());
+              reply(EncodableValue(std::move(wrapped)));
+            } catch (const std::exception& exception) {
+              reply(WrapError(exception.what()));
+            }
+          });
     } else {
       channel.SetMessageHandler(nullptr);
     }
   }
   {
-    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.video_player_windows.VideoPlayerInstanceApi.setVolume" + prepended_suffix, &GetCodec());
+    BasicMessageChannel<> channel(binary_messenger,
+                                  "dev.flutter.pigeon.video_player_windows."
+                                  "VideoPlayerInstanceApi.setVolume" +
+                                      prepended_suffix,
+                                  &GetCodec());
     if (api != nullptr) {
-      channel.SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
-        try {
-          const auto& args = std::get<EncodableList>(message);
-          const auto& encodable_volume_arg = args.at(0);
-          if (encodable_volume_arg.IsNull()) {
-            reply(WrapError("volume_arg unexpectedly null."));
-            return;
-          }
-          const auto& volume_arg = std::get<double>(encodable_volume_arg);
-          std::optional<FlutterError> output = api->SetVolume(volume_arg);
-          if (output.has_value()) {
-            reply(WrapError(output.value()));
-            return;
-          }
-          EncodableList wrapped;
-          wrapped.push_back(EncodableValue());
-          reply(EncodableValue(std::move(wrapped)));
-        } catch (const std::exception& exception) {
-          reply(WrapError(exception.what()));
-        }
-      });
+      channel.SetMessageHandler(
+          [api](const EncodableValue& message,
+                const flutter::MessageReply<EncodableValue>& reply) {
+            try {
+              const auto& args = std::get<EncodableList>(message);
+              const auto& encodable_volume_arg = args.at(0);
+              if (encodable_volume_arg.IsNull()) {
+                reply(WrapError("volume_arg unexpectedly null."));
+                return;
+              }
+              const auto& volume_arg = std::get<double>(encodable_volume_arg);
+              std::optional<FlutterError> output = api->SetVolume(volume_arg);
+              if (output.has_value()) {
+                reply(WrapError(output.value()));
+                return;
+              }
+              EncodableList wrapped;
+              wrapped.push_back(EncodableValue());
+              reply(EncodableValue(std::move(wrapped)));
+            } catch (const std::exception& exception) {
+              reply(WrapError(exception.what()));
+            }
+          });
     } else {
       channel.SetMessageHandler(nullptr);
     }
   }
   {
-    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.video_player_windows.VideoPlayerInstanceApi.setPlaybackSpeed" + prepended_suffix, &GetCodec());
+    BasicMessageChannel<> channel(binary_messenger,
+                                  "dev.flutter.pigeon.video_player_windows."
+                                  "VideoPlayerInstanceApi.setPlaybackSpeed" +
+                                      prepended_suffix,
+                                  &GetCodec());
     if (api != nullptr) {
-      channel.SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
-        try {
-          const auto& args = std::get<EncodableList>(message);
-          const auto& encodable_speed_arg = args.at(0);
-          if (encodable_speed_arg.IsNull()) {
-            reply(WrapError("speed_arg unexpectedly null."));
-            return;
-          }
-          const auto& speed_arg = std::get<double>(encodable_speed_arg);
-          std::optional<FlutterError> output = api->SetPlaybackSpeed(speed_arg);
-          if (output.has_value()) {
-            reply(WrapError(output.value()));
-            return;
-          }
-          EncodableList wrapped;
-          wrapped.push_back(EncodableValue());
-          reply(EncodableValue(std::move(wrapped)));
-        } catch (const std::exception& exception) {
-          reply(WrapError(exception.what()));
-        }
-      });
+      channel.SetMessageHandler(
+          [api](const EncodableValue& message,
+                const flutter::MessageReply<EncodableValue>& reply) {
+            try {
+              const auto& args = std::get<EncodableList>(message);
+              const auto& encodable_speed_arg = args.at(0);
+              if (encodable_speed_arg.IsNull()) {
+                reply(WrapError("speed_arg unexpectedly null."));
+                return;
+              }
+              const auto& speed_arg = std::get<double>(encodable_speed_arg);
+              std::optional<FlutterError> output =
+                  api->SetPlaybackSpeed(speed_arg);
+              if (output.has_value()) {
+                reply(WrapError(output.value()));
+                return;
+              }
+              EncodableList wrapped;
+              wrapped.push_back(EncodableValue());
+              reply(EncodableValue(std::move(wrapped)));
+            } catch (const std::exception& exception) {
+              reply(WrapError(exception.what()));
+            }
+          });
     } else {
       channel.SetMessageHandler(nullptr);
     }
   }
   {
-    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.video_player_windows.VideoPlayerInstanceApi.play" + prepended_suffix, &GetCodec());
+    BasicMessageChannel<> channel(
+        binary_messenger,
+        "dev.flutter.pigeon.video_player_windows.VideoPlayerInstanceApi.play" +
+            prepended_suffix,
+        &GetCodec());
     if (api != nullptr) {
-      channel.SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
-        try {
-          std::optional<FlutterError> output = api->Play();
-          if (output.has_value()) {
-            reply(WrapError(output.value()));
-            return;
-          }
-          EncodableList wrapped;
-          wrapped.push_back(EncodableValue());
-          reply(EncodableValue(std::move(wrapped)));
-        } catch (const std::exception& exception) {
-          reply(WrapError(exception.what()));
-        }
-      });
+      channel.SetMessageHandler(
+          [api](const EncodableValue& message,
+                const flutter::MessageReply<EncodableValue>& reply) {
+            try {
+              std::optional<FlutterError> output = api->Play();
+              if (output.has_value()) {
+                reply(WrapError(output.value()));
+                return;
+              }
+              EncodableList wrapped;
+              wrapped.push_back(EncodableValue());
+              reply(EncodableValue(std::move(wrapped)));
+            } catch (const std::exception& exception) {
+              reply(WrapError(exception.what()));
+            }
+          });
     } else {
       channel.SetMessageHandler(nullptr);
     }
   }
   {
-    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.video_player_windows.VideoPlayerInstanceApi.pause" + prepended_suffix, &GetCodec());
+    BasicMessageChannel<> channel(
+        binary_messenger,
+        "dev.flutter.pigeon.video_player_windows.VideoPlayerInstanceApi.pause" +
+            prepended_suffix,
+        &GetCodec());
     if (api != nullptr) {
-      channel.SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
-        try {
-          std::optional<FlutterError> output = api->Pause();
-          if (output.has_value()) {
-            reply(WrapError(output.value()));
-            return;
-          }
-          EncodableList wrapped;
-          wrapped.push_back(EncodableValue());
-          reply(EncodableValue(std::move(wrapped)));
-        } catch (const std::exception& exception) {
-          reply(WrapError(exception.what()));
-        }
-      });
+      channel.SetMessageHandler(
+          [api](const EncodableValue& message,
+                const flutter::MessageReply<EncodableValue>& reply) {
+            try {
+              std::optional<FlutterError> output = api->Pause();
+              if (output.has_value()) {
+                reply(WrapError(output.value()));
+                return;
+              }
+              EncodableList wrapped;
+              wrapped.push_back(EncodableValue());
+              reply(EncodableValue(std::move(wrapped)));
+            } catch (const std::exception& exception) {
+              reply(WrapError(exception.what()));
+            }
+          });
     } else {
       channel.SetMessageHandler(nullptr);
     }
   }
   {
-    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.video_player_windows.VideoPlayerInstanceApi.seekTo" + prepended_suffix, &GetCodec());
+    BasicMessageChannel<> channel(binary_messenger,
+                                  "dev.flutter.pigeon.video_player_windows."
+                                  "VideoPlayerInstanceApi.seekTo" +
+                                      prepended_suffix,
+                                  &GetCodec());
     if (api != nullptr) {
-      channel.SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
-        try {
-          const auto& args = std::get<EncodableList>(message);
-          const auto& encodable_position_arg = args.at(0);
-          if (encodable_position_arg.IsNull()) {
-            reply(WrapError("position_arg unexpectedly null."));
-            return;
-          }
-          const int64_t position_arg = encodable_position_arg.LongValue();
-          std::optional<FlutterError> output = api->SeekTo(position_arg);
-          if (output.has_value()) {
-            reply(WrapError(output.value()));
-            return;
-          }
-          EncodableList wrapped;
-          wrapped.push_back(EncodableValue());
-          reply(EncodableValue(std::move(wrapped)));
-        } catch (const std::exception& exception) {
-          reply(WrapError(exception.what()));
-        }
-      });
+      channel.SetMessageHandler(
+          [api](const EncodableValue& message,
+                const flutter::MessageReply<EncodableValue>& reply) {
+            try {
+              const auto& args = std::get<EncodableList>(message);
+              const auto& encodable_position_arg = args.at(0);
+              if (encodable_position_arg.IsNull()) {
+                reply(WrapError("position_arg unexpectedly null."));
+                return;
+              }
+              const int64_t position_arg = encodable_position_arg.LongValue();
+              std::optional<FlutterError> output = api->SeekTo(position_arg);
+              if (output.has_value()) {
+                reply(WrapError(output.value()));
+                return;
+              }
+              EncodableList wrapped;
+              wrapped.push_back(EncodableValue());
+              reply(EncodableValue(std::move(wrapped)));
+            } catch (const std::exception& exception) {
+              reply(WrapError(exception.what()));
+            }
+          });
     } else {
       channel.SetMessageHandler(nullptr);
     }
   }
   {
-    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.video_player_windows.VideoPlayerInstanceApi.getCurrentPosition" + prepended_suffix, &GetCodec());
+    BasicMessageChannel<> channel(binary_messenger,
+                                  "dev.flutter.pigeon.video_player_windows."
+                                  "VideoPlayerInstanceApi.getCurrentPosition" +
+                                      prepended_suffix,
+                                  &GetCodec());
     if (api != nullptr) {
-      channel.SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
-        try {
-          ErrorOr<int64_t> output = api->GetCurrentPosition();
-          if (output.has_error()) {
-            reply(WrapError(output.error()));
-            return;
-          }
-          EncodableList wrapped;
-          wrapped.push_back(EncodableValue(std::move(output).TakeValue()));
-          reply(EncodableValue(std::move(wrapped)));
-        } catch (const std::exception& exception) {
-          reply(WrapError(exception.what()));
-        }
-      });
+      channel.SetMessageHandler(
+          [api](const EncodableValue& message,
+                const flutter::MessageReply<EncodableValue>& reply) {
+            try {
+              ErrorOr<int64_t> output = api->GetCurrentPosition();
+              if (output.has_error()) {
+                reply(WrapError(output.error()));
+                return;
+              }
+              EncodableList wrapped;
+              wrapped.push_back(EncodableValue(std::move(output).TakeValue()));
+              reply(EncodableValue(std::move(wrapped)));
+            } catch (const std::exception& exception) {
+              reply(WrapError(exception.what()));
+            }
+          });
     } else {
       channel.SetMessageHandler(nullptr);
     }
   }
   {
-    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.video_player_windows.VideoPlayerInstanceApi.getBufferedPosition" + prepended_suffix, &GetCodec());
+    BasicMessageChannel<> channel(binary_messenger,
+                                  "dev.flutter.pigeon.video_player_windows."
+                                  "VideoPlayerInstanceApi.getBufferedPosition" +
+                                      prepended_suffix,
+                                  &GetCodec());
     if (api != nullptr) {
-      channel.SetMessageHandler([api](const EncodableValue& message, const flutter::MessageReply<EncodableValue>& reply) {
-        try {
-          ErrorOr<int64_t> output = api->GetBufferedPosition();
-          if (output.has_error()) {
-            reply(WrapError(output.error()));
-            return;
-          }
-          EncodableList wrapped;
-          wrapped.push_back(EncodableValue(std::move(output).TakeValue()));
-          reply(EncodableValue(std::move(wrapped)));
-        } catch (const std::exception& exception) {
-          reply(WrapError(exception.what()));
-        }
-      });
+      channel.SetMessageHandler(
+          [api](const EncodableValue& message,
+                const flutter::MessageReply<EncodableValue>& reply) {
+            try {
+              ErrorOr<int64_t> output = api->GetBufferedPosition();
+              if (output.has_error()) {
+                reply(WrapError(output.error()));
+                return;
+              }
+              EncodableList wrapped;
+              wrapped.push_back(EncodableValue(std::move(output).TakeValue()));
+              reply(EncodableValue(std::move(wrapped)));
+            } catch (const std::exception& exception) {
+              reply(WrapError(exception.what()));
+            }
+          });
     } else {
       channel.SetMessageHandler(nullptr);
     }
   }
 }
 
-EncodableValue VideoPlayerInstanceApi::WrapError(std::string_view error_message) {
-  return EncodableValue(EncodableList{
-    EncodableValue(std::string(error_message)),
-    EncodableValue("Error"),
-    EncodableValue()
-  });
+EncodableValue VideoPlayerInstanceApi::WrapError(
+    std::string_view error_message) {
+  return EncodableValue(
+      EncodableList{EncodableValue(std::string(error_message)),
+                    EncodableValue("Error"), EncodableValue()});
 }
 
 EncodableValue VideoPlayerInstanceApi::WrapError(const FlutterError& error) {
-  return EncodableValue(EncodableList{
-    EncodableValue(error.code()),
-    EncodableValue(error.message()),
-    error.details()
-  });
+  return EncodableValue(EncodableList{EncodableValue(error.code()),
+                                      EncodableValue(error.message()),
+                                      error.details()});
 }
 
 }  // namespace video_player_windows

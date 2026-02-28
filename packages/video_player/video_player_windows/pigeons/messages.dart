@@ -13,7 +13,6 @@ import 'package:pigeon/pigeon.dart';
     copyrightHeader: 'pigeons/copyright.txt',
   ),
 )
-
 /// Options for creating a new video player.
 class CreationOptions {
   CreationOptions({required this.uri, required this.httpHeaders});
