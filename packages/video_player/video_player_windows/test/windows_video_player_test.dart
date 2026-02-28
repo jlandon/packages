@@ -62,7 +62,7 @@ void main() {
 
       const asset = 'someAsset';
       const package = 'somePackage';
-      const assetUrl = 'C:\\path\\to\\asset';
+      const assetUrl = r'C:\path\to\asset';
       when(api.getAssetUrl(asset, package)).thenAnswer((_) async => assetUrl);
 
       final int? playerId = await player.create(
@@ -153,7 +153,7 @@ void main() {
 
       const asset = 'someAsset';
       const package = 'somePackage';
-      const assetUrl = 'C:\\path\\to\\asset';
+      const assetUrl = r'C:\path\to\asset';
       when(api.getAssetUrl(asset, package)).thenAnswer((_) async => assetUrl);
 
       final int? playerId = await player.createWithOptions(
